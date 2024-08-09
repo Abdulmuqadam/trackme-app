@@ -1,7 +1,7 @@
 // ignore_for_file: constant_identifier_names
 import 'package:flutter/material.dart';
 
-const String Google_Maps_Api_key = "AIzaSyAFifret1S_CkgBUs1MyMg-0_QMoFKzn9I";
+const String Google_Maps_Api_key = "API-KEY";
 const String Api_Link = "https://backend.prometheansempiremedia.com";
 // const String Api_Link = "https://trackme.cyclic.app/";
 const Profile_Image = 'https://source.unsplash.com/random/1080x1080/?man';
