@@ -1,169 +1,95 @@
 const db = require("../model");
-const multer = require("multer");
-const path = require("path");
-const geolib = require("geolib");
-const { where } = require("sequelize");
-const fs = require("fs");
+const { getDistance } = require("geolib");
 
 const Query = db.Queries;
 const Facilitator = db.facilitators;
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    let datetimestamp = Date.now();
-    cb(null, datetimestamp + path.extname(file.originalname));
-  },
-});
+const QUERY_TYPE_TO_ROLE = {
+  "Home Invasion": "Police",
+  "Medical Help": "Ambulance",
+  "Fire Extinguisher": "Rescue",
+  "Travel Emergency": "Road Assistance",
+};
 
-const uploads = multer({ storage: storage });
+const MAX_RADIUS_KM = parseInt(process.env.FACILITATOR_RADIUS_KM || "15", 10);
 
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371; // Radius of the Earth in kilometers
-  const dLat = deg2rad(lat2 - lat1);
-  const dLon = deg2rad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(deg2rad(lat1)) *
-      Math.cos(deg2rad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distance = R * c; // Distance in kilometers
-  return distance;
-}
-
-function deg2rad(deg) {
-  return deg * (Math.PI / 180);
-}
-
-function findNearbyLocations(baseLocation, locations, maxDistance) {
-  const [baseLat, baseLon] = baseLocation.split(",").map(parseFloat);
-  const nearbyLocations = [];
-
-  for (const loc of locations) {
-    const [lat, lon] = loc.split(",").map(parseFloat);
-    const distance = calculateDistance(baseLat, baseLon, lat, lon);
-    if (distance <= maxDistance) {
-      nearbyLocations.push({ location: loc, distance: distance });
-    }
-  }
-
-  return nearbyLocations;
-}
-
-function findNearestLocation(locations) {
-  let minDistance = Infinity;
-  let nearestLocation = null;
-
-  for (const loc of locations) {
-    if (loc.distance < minDistance) {
-      minDistance = loc.distance;
-      nearestLocation = loc.location;
-    }
-  }
-
-  return nearestLocation;
-}
-
-const writeAudioFile = async (base64Audio, filePath) => {
-  try {
-    const audioData = Buffer.from(base64Audio, "base64");
-
-    fs.writeFileSync(filePath, audioData);
-
-    console.log("Audio file written successfully:", filePath);
-  } catch (error) {
-    console.error("Failed to write audio file:", error);
-    throw error;
-  }
+/**
+ * Parse a "lat,lon" string into { latitude, longitude }.
+ * Returns null if the string is malformed.
+ */
+const parseCoords = (coordStr) => {
+  if (!coordStr) return null;
+  const parts = coordStr.split(",").map(parseFloat);
+  if (parts.length !== 2 || parts.some(isNaN)) return null;
+  return { latitude: parts[0], longitude: parts[1] };
 };
 
 const saveQuery = async (req, res) => {
   try {
-    // Destructure fields from the request body
     const { text, querytype, audio, postedBy, completed, location } = req.body;
 
-    // Ensure required fields are present
     if (!querytype || !postedBy || !audio) {
       return res
         .status(400)
         .json({ error: "querytype, postedBy, and audio are required" });
     }
 
-    // Define the role based on query type
-    let role;
-    switch (querytype) {
-      case "Home Invasion":
-        role = "Police";
-        break;
-      case "Medical Help":
-        role = "Ambulance";
-        break;
-      case "Fire Extinguisher":
-        role = "Rescue";
-        break;
-      case "Travel Emergency":
-        role = "Road Assistance";
-        break;
-      default:
-        return res.status(400).json({ error: "Invalid query type" });
+    const role = QUERY_TYPE_TO_ROLE[querytype];
+    if (!role) {
+      return res.status(400).json({ error: "Invalid query type" });
     }
 
-    // Query Location
-    const baseLocation = location;
-    const maxDistance = 15;
+    const baseCoords = parseCoords(location);
+    if (!baseCoords) {
+      return res.status(400).json({ error: "Invalid or missing location" });
+    }
 
-    // Query facilitator data based on role
-    const facilitators = await Facilitator.findAll({
-      where: { role },
-    });
+    const facilitators = await Facilitator.findAll({ where: { role } });
 
-    if (facilitators.length > 0) {
-      const facilitatorLocations = facilitators.map(
-        (facilitator) => facilitator.location
-      );
-
-      const locations = facilitatorLocations;
-      const nearbyLocations = findNearbyLocations(
-        baseLocation,
-        locations,
-        maxDistance
-      );
-      const nearestLocation = findNearestLocation(nearbyLocations);
-
-      const facilitator = await Facilitator.findOne({
-        where: { location: nearestLocation },
-      });
-      if (facilitator) {
-        // Save the data to the database with the assigned facilitator's ID
-        const data = await Query.create({
-          text,
-          querytype,
-          audio,
-          postedBy,
-          assignedTo: facilitator.id,
-          completed,
-          location,
-        });
-
-        // Respond with success message and saved data
-        res.status(201).json({
-          message: "Data is successfully saved",
-          location: facilitator.location,
-          facilitator_id: facilitator.id,
-        });
-      }
-    } else {
+    if (facilitators.length === 0) {
       return res
         .status(404)
         .json({ error: `No ${role} available near the specified location` });
     }
+
+    // Use geolib to find the nearest facilitator within MAX_RADIUS_KM
+    let nearestFacilitator = null;
+    let minDistanceM = Infinity;
+
+    for (const facilitator of facilitators) {
+      const coords = parseCoords(facilitator.location);
+      if (!coords) continue;
+      const distanceM = getDistance(baseCoords, coords);
+      if (distanceM <= MAX_RADIUS_KM * 1000 && distanceM < minDistanceM) {
+        minDistanceM = distanceM;
+        nearestFacilitator = facilitator;
+      }
+    }
+
+    if (!nearestFacilitator) {
+      return res
+        .status(404)
+        .json({ error: `No ${role} available within ${MAX_RADIUS_KM} km` });
+    }
+
+    await Query.create({
+      text,
+      querytype,
+      audio,
+      postedBy,
+      assignedTo: nearestFacilitator.id,
+      completed,
+      location,
+    });
+
+    res.status(201).json({
+      message: "Query saved successfully",
+      location: nearestFacilitator.location,
+      facilitator_id: nearestFacilitator.id,
+    });
   } catch (error) {
-    console.error("Error saving data:", error);
-    res.status(500).json({ error: "Failed to save data" });
+    console.error("Error saving query:", error);
+    res.status(500).json({ error: "Failed to save query" });
   }
 };
 

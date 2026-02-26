@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend_app_flutter/core/constants/app_constants.dart';
+import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/screens/chat_screen.dart';
 import 'package:frontend_app_flutter/screens/map_page.dart';
@@ -31,7 +33,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(fontFamily: "Poppins"),
+      theme: AppTheme.light,
       home: const SplashScreen(),
     );
   }

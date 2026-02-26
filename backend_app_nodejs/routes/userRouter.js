@@ -1,11 +1,16 @@
 const userController = require("../controllers/userController");
+const { authenticateToken } = require("../src/middleware/auth.middleware");
+const { authLimiter } = require("../src/middleware/rateLimiter.middleware");
 const router = require("express").Router();
 
-router.post("/signup", userController.signUp);
-router.post("/login", userController.login);
-router.post("/update/:id", userController.updateUser);
+// Public routes (stricter rate limit for auth)
+router.post("/signup", authLimiter, userController.signUp);
+router.post("/login", authLimiter, userController.login);
 router.post("/verify", userController.checkUserIsValid);
-router.post("/getuser", userController.userById);
-router.post("/emailchecker", userController.checkUserEmail);
+router.get("/emailchecker", userController.checkUserEmail);
+
+// Protected routes (require valid JWT)
+router.post("/update/:id", authenticateToken, userController.updateUser);
+router.post("/getuser", authenticateToken, userController.userById);
 
 module.exports = router;
