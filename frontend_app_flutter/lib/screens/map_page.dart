@@ -67,7 +67,7 @@ class _MapPageState extends State<MapPage> {
   late StreamSubscription<LocationData?> _locationSubscription;
   late SharedPreferences _preferences;
   late Timer _locationTimer;
-  late LatLng _source;
+  LatLng _source = const LatLng(0.0, 0.0);
   late String username;
   late String complainername;
   bool _isPreferencesInitialized = false;

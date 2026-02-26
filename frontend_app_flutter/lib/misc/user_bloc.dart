@@ -9,7 +9,7 @@ class UserBloc extends Cubit<UserType> {
 
   void toggleUserType() {
     emit(state == UserType.normalUser
-        ? UserType.normalUser
-        : UserType.facilitatorUser);
+        ? UserType.facilitatorUser
+        : UserType.normalUser);
   }
 }

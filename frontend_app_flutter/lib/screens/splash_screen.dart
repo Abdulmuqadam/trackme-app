@@ -52,6 +52,7 @@ class _SplashScreenState extends State<SplashScreen>
         Future.delayed(
           const Duration(seconds: 5),
           () {
+            if (!mounted) return;
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => const LogInScreen(),
@@ -67,12 +68,15 @@ class _SplashScreenState extends State<SplashScreen>
 
         final responseData = response.body;
         final data = jsonDecode(responseData);
-        prefs.setInt("user_id", data["userId"]);
-
         if (response.statusCode == 200) {
+          final userId = (data["userId"] as num?)?.toInt();
+          if (userId != null) {
+            prefs.setInt("user_id", userId);
+          }
           Future.delayed(
             const Duration(seconds: 5),
             () {
+              if (!mounted) return;
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => const MainPage(),
@@ -84,6 +88,7 @@ class _SplashScreenState extends State<SplashScreen>
           Future.delayed(
             const Duration(seconds: 2),
             () {
+              if (!mounted) return;
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => const LogInScreen(),
@@ -111,6 +116,7 @@ class _SplashScreenState extends State<SplashScreen>
         Future.delayed(
           const Duration(seconds: 5),
           () {
+            if (!mounted) return;
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => const LogInScreen(),
@@ -126,12 +132,15 @@ class _SplashScreenState extends State<SplashScreen>
 
         final responseData = response.body;
         final data = jsonDecode(responseData);
-        prefs.setInt("user_id", data["userId"]);
-
         if (response.statusCode == 200) {
+          final userId = (data["userId"] as num?)?.toInt();
+          if (userId != null) {
+            prefs.setInt("user_id", userId);
+          }
           Future.delayed(
             const Duration(seconds: 5),
             () {
+              if (!mounted) return;
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => const MainPage(),
@@ -143,6 +152,7 @@ class _SplashScreenState extends State<SplashScreen>
           Future.delayed(
             const Duration(seconds: 2),
             () {
+              if (!mounted) return;
               Navigator.of(context).pushReplacement(
                 MaterialPageRoute(
                   builder: (context) => const LogInScreen(),

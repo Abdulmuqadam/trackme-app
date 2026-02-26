@@ -93,7 +93,7 @@ class _TextBoxState extends State<TextBox> {
   late FlutterSoundPlayer _player;
   bool isRecording = false;
   bool isPlaying = false;
-  late String filePath;
+  String? filePath;
   late String? _selectedContact;
 
   @override
@@ -397,7 +397,7 @@ class _TextBoxState extends State<TextBox> {
                     padding: const EdgeInsets.symmetric(horizontal: 25),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: const Color.fromRGBO(14, 116, 57, 1),
+                        color: secondaryColor,
                         width: 2.0,
                       ),
                       borderRadius: BorderRadius.circular(10.0),
@@ -463,7 +463,20 @@ class _TextBoxState extends State<TextBox> {
                     ),
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        sendData(context, filePath, widget.user);
+                        if (filePath == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: CustomSnackBarWidget(
+                                errorText: "Please record a voice note first",
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: Colors.transparent,
+                              elevation: 0,
+                            ),
+                          );
+                          return;
+                        }
+                        sendData(context, filePath!, widget.user);
                       },
                       icon: const Icon(
                         Icons.send,
