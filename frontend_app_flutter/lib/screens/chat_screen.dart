@@ -61,9 +61,15 @@ class _ChatScreenState extends State<ChatScreen> {
       ).build(),
     );
 
-    socket.onConnect((data) => print("Connect established"));
-    socket.onConnectError((data) => print("Connect Error:$data"));
-    socket.onDisconnect((data) => print("Socket.io server disconnected"));
+    socket.onConnect((data) {
+      if (kDebugMode) print("Connect established");
+    });
+    socket.onConnectError((data) {
+      if (kDebugMode) print("Connect Error:$data");
+    });
+    socket.onDisconnect((data) {
+      if (kDebugMode) print("Socket.io server disconnected");
+    });
     socket.on(
       "message",
       (data) =>

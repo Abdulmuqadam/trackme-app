@@ -113,6 +113,7 @@ class _LogInFormState extends State<LogInForm> {
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         prefs.setString('jwt_token', token);
         prefs.setInt("user_id", data["userId"]);
+        prefs.setString("user_type", "user");
         if (kDebugMode) {
           print(data["userId"]);
         }
@@ -227,8 +228,8 @@ class _LogInFormState extends State<LogInForm> {
                 labelText: "Email",
                 hintText: "Enter the Email",
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                floatingLabelStyle: const TextStyle(
-                  color: Color.fromRGBO(14, 116, 57, 1),
+                floatingLabelStyle: TextStyle(
+                  color: secondaryColor,
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 40,
@@ -242,7 +243,7 @@ class _LogInFormState extends State<LogInForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(28),
                   borderSide:
-                      const BorderSide(color: Color.fromRGBO(14, 116, 57, 1)),
+                      BorderSide(color: secondaryColor),
                   gapPadding: 10,
                 ),
                 suffixIcon: const Padding(
@@ -264,8 +265,8 @@ class _LogInFormState extends State<LogInForm> {
                 labelText: "Password",
                 hintText: "Enter the password",
                 floatingLabelBehavior: FloatingLabelBehavior.always,
-                floatingLabelStyle: const TextStyle(
-                  color: Color.fromRGBO(14, 116, 57, 1),
+                floatingLabelStyle: TextStyle(
+                  color: secondaryColor,
                 ),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 40,
@@ -279,7 +280,7 @@ class _LogInFormState extends State<LogInForm> {
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(28),
                   borderSide:
-                      const BorderSide(color: Color.fromRGBO(14, 116, 57, 1)),
+                      BorderSide(color: secondaryColor),
                   gapPadding: 10,
                 ),
                 suffixIcon: Padding(

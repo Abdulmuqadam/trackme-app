@@ -58,7 +58,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             print("data is got successfully");
           }
           preferences.setString(
-              "username", data["firstname"] + "" + data["lastname"]);
+              "username", data["firstname"] + " " + data["lastname"]);
           setState(() {
             email = data["email"];
             username = data["firstname"] + " " + data["lastname"];
