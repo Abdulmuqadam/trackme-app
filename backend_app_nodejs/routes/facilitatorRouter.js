@@ -1,11 +1,16 @@
 const facilitatorController = require("../controllers/facilitatorController");
+const { authenticateToken } = require("../src/middleware/auth.middleware");
+const { authLimiter } = require("../src/middleware/rateLimiter.middleware");
 const router = require("express").Router();
 
-router.post("/signup", facilitatorController.signUp);
-router.post("/login", facilitatorController.login);
-router.post("/update/:id", facilitatorController.updateFascilitator);
+// Public routes
+router.post("/signup", authLimiter, facilitatorController.signUp);
+router.post("/login", authLimiter, facilitatorController.login);
 router.post("/verify", facilitatorController.checkFacilitatorIsValid);
-router.post("/getfacilitator", facilitatorController.facilitatorById);
-router.post("/emailchecker", facilitatorController.checkFacilitatorEmail);
+router.get("/emailchecker", facilitatorController.checkFacilitatorEmail);
+
+// Protected routes
+router.post("/update/:id", authenticateToken, facilitatorController.updateFacilitator);
+router.post("/getfacilitator", authenticateToken, facilitatorController.facilitatorById);
 
 module.exports = router;
