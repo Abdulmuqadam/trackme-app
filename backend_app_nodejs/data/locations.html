@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map with Markers</title>
+    <style>
+        /* Specify the dimensions of the map */
+        #map {
+            height: 400px;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <script>
+        function initMap() {
+            // Center the map at a specific location
+            var center = { lat: 0, lng: 0 }; // Centered at equator for demonstration
+            var map = new google.maps.Map(document.getElementById('map'), {
+                zoom: 2, // Adjust the zoom level as needed
+                center: center
+            });
+
+            // Array of locations with latitude and longitude
+            var locations = [
+                { lat: 31.5775917, lng: 74.350499 },
+                { lat: 31.5989803, lng: 74.3653024 },
+                { lat: 31.5806665, lng: 74.335957 },
+                { lat: 31.5590464, lng: 74.3123659 },
+                { lat: 31.5758749, lng: 74.3030873 },
+                { lat: 31.5481796, lng: 74.3439477 },
+                { lat: 31.5082238, lng: 74.3968368 },
+                { lat: 31.5669356, lng: 74.3939057 },
+                { lat: 31.5625091, lng: 74.3022132 },
+                { lat: 31.5598134, lng: 74.3072082 },
+                { lat: 31.5714472, lng: 74.3308756 },
+                { lat: 31.5611396, lng: 74.3605762 },
+                { lat: 31.5581171, lng: 74.3163346 },
+                { lat: 31.5760423, lng: 74.3892121 },
+                { lat: 31.5656178, lng: 74.3224784 },
+                { lat: 31.5432221, lng: 74.319883 },
+                { lat: 31.5306922, lng: 74.3829095 },
+                { lat: 31.5057949, lng: 74.3110017 },
+                { lat: 31.5162444, lng: 74.3071744 },
+                { lat: 31.5039365, lng: 74.3557416 },
+                { lat: 31.5125704, lng: 74.381019 },
+                { lat: 31.5564793, lng: 74.3280628 },
+                { lat: 31.5702843, lng: 74.393155 },
+                { lat: 31.5771644, lng: 74.3902097 },
+                { lat: 31.5073106, lng: 74.399428 },
+                { lat: 31.5068494, lng: 74.3029964 },
+                { lat: 31.5944821, lng: 74.3829311 },
+                { lat: 31.5521702, lng: 74.3819376 },
+                { lat: 31.5049146, lng: 74.3186581 },
+                { lat: 31.5915843, lng: 74.3863643 },
+                { lat: 31.5679407, lng: 74.3768687 },
+                { lat: 31.5642896, lng: 74.362637 },
+                { lat: 31.5717401, lng: 74.3512175 },
+                { lat: 31.5943746, lng: 74.3895628 },
+                { lat: 31.5552356, lng: 74.3390937 },
+                { lat: 31.525251, lng: 74.319552 },
+                { lat: 31.5817963, lng: 74.3484843 },
+                { lat: 31.5003856, lng: 74.3374119 },
+                { lat: 31.5725884, lng: 74.3936284 },
+                { lat: 31.5662502, lng: 74.3260484 },
+                { lat: 31.5292633, lng: 74.3766652 },
+                { lat: 31.569913, lng: 74.3389173 },
+                { lat: 31.5617522, lng: 74.3287788 },
+                { lat: 31.5043647, lng: 74.3655163 },
+                { lat: 31.5778593, lng: 74.3291902 },
+                { lat: 31.5689928, lng: 74.3751755 },
+                { lat: 31.5179186, lng: 74.3807569 },
+                { lat: 31.547072, lng: 74.3824078 },
+                { lat: 31.5260307, lng: 74.3822943 },
+                { lat: 31.5239113, lng: 74.3643339 },
+                { lat: 31.5921255, lng: 74.3005773 },
+                { lat: 31.5243729, lng: 74.3919445 },
+                { lat: 31.5854321, lng: 74.3442414 },
+                { lat: 31.5017527, lng: 74.3192943 },
+                { lat: 31.502385, lng: 74.3614463 },
+                { lat: 31.5550693, lng: 74.3817626 },
+                { lat: 31.5076661, lng: 74.3461687 },
+                { lat: 31.5142809, lng: 74.317142 },
+                { lat: 31.5373447, lng: 74.3718204 },
+                { lat: 31.5026242, lng: 74.3489286 },
+                { lat: 31.563975, lng: 74.3838749 },
+                { lat: 31.5060886, lng: 74.3624344 },
+                { lat: 31.5759811, lng: 74.3351168 },
+                { lat: 31.5373761, lng: 74.3740985 },
+                { lat: 31.5098238, lng: 74.3701612 },
+                { lat: 31.5163065, lng: 74.3008005 },
+                { lat: 31.5185946, lng: 74.3432838 },
+                { lat: 31.5183272, lng: 74.3685641 },
+                { lat: 31.5255347, lng: 74.3118586 },
+                { lat: 31.5731162, lng: 74.3183302 },
+                { lat: 31.524487, lng: 74.3119088 },
+                { lat: 31.510569, lng: 74.3503301 },
+                { lat: 31.5115852, lng: 74.3496246 },
+                { lat: 31.5872104, lng: 74.3460533 },
+                { lat: 31.5174488, lng: 74.3277938 },
+                { lat: 31.5213133, lng: 74.3753292 },
+                { lat: 31.5884702, lng: 74.3347874 },
+                { lat: 31.5438207, lng: 74.3070049 },
+                { lat: 31.5890033, lng: 74.3855266 },
+                { lat: 31.5876695, lng: 74.3685411 },
+                { lat: 31.5497404, lng: 74.3151254 },
+                { lat: 31.5450329, lng: 74.3640306 },
+                { lat: 31.5420228, lng: 74.3348857 },
+                { lat: 31.5594519, lng: 74.3009238 },
+                { lat: 31.5364392, lng: 74.3439964 },
+                { lat: 31.5583885, lng: 74.3629563 },
+                { lat: 31.5010585, lng: 74.3475827 },
+                { lat: 31.5422634, lng: 74.3812874 },
+                { lat: 31.5259788, lng: 74.3689654 },
+                { lat: 31.5132685, lng: 74.3899944 },
+                { lat: 31.5756773, lng: 74.3554854 },
+                { lat: 31.5190029, lng: 74.3057968 },
+                { lat: 31.5508872, lng: 74.3340214 },
+                { lat: 31.5601052, lng: 74.3852471 },
+                { lat: 31.579958, lng: 74.3073768 },
+                { lat: 31.5590074, lng: 74.304186 },
+                { lat: 31.5707573, lng: 74.3855836 },
+                { lat: 31.5564207, lng: 74.3884828 },
+                { lat: 31.5395071, lng: 74.3163144 },
+                { lat: 31.5302583, lng: 74.3685646 },
+                // Add more locations as needed
+            ];
+
+            // Loop through the locations and add markers to the map
+            locations.forEach(function (location) {
+                var marker = new google.maps.Marker({
+                    position: location,
+                    map: map
+                });
+            });
+        }
+    </script>
+
+    <!-- Load the Google Maps JavaScript API -->
+    <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAFifret1S_CkgBUs1MyMg-0_QMoFKzn9I&callback=initMap"></script>
+    <!-- Replace YOUR_API_KEY with your actual API key -->
+</body>
+
+</html>
