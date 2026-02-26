@@ -37,7 +37,6 @@ Both roles communicate in real time through an in-app chat powered by Socket.io.
 ## Features
 
 ### User Features
-
 - 🆘 **Emergency Query Submission** — choose from four emergency categories (Home Invasion, Medical Help, Fire Extinguisher, Travel Emergency).
 - 🎙️ **Voice Note Attachment** — record and attach an audio description to each query.
 - 📍 **Live Location Sharing** — automatic background location reporting so the assigned facilitator can navigate to the user.
@@ -47,7 +46,6 @@ Both roles communicate in real time through an in-app chat powered by Socket.io.
 - 📋 **Query History** — list all previously submitted queries with their status.
 
 ### Facilitator Features
-
 - 📂 **Assigned Queries Dashboard** — view all emergency queries routed to this facilitator.
 - ▶️ **Audio Playback** — listen to the user's voice note directly within the app.
 - ✅ **Completion Toggle** — mark queries as resolved; status is synced to the backend.
@@ -55,7 +53,6 @@ Both roles communicate in real time through an in-app chat powered by Socket.io.
 - 💬 **Real-time Chat** — communicate with the user before or during the response.
 
 ### Common Features
-
 - 🔐 **JWT Authentication** — secure login / registration for both user types.
 - 👤 **Profile Management** — view and edit name, email.
 - 📖 **Help & Support** and **Terms & Conditions** screens.
@@ -349,7 +346,6 @@ The following REST endpoints are consumed by the Flutter app:
 ### Backend
 
 The Node.js backend should be deployed behind HTTPS with:
-
 - JWT secret stored as an environment variable (`JWT_SECRET`)
 - A relational or NoSQL database for Users, Facilitators, and Queries
 - Static file serving for uploaded audio files (returned as relative paths under `/uploads/`)
