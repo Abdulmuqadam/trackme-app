@@ -65,7 +65,7 @@ const login = async (req, res) => {
 };
 
 // Update Facilitator
-const updateFascilitator = async (req, res) => {
+const updateFacilitator = async (req, res) => {
   try {
     const userId = req.params.id;
     const { firstname, lastname, gender, number, profilepic } = req.body;
@@ -153,6 +153,6 @@ module.exports = {
   login,
   checkFacilitatorIsValid,
   facilitatorById,
-  updateFascilitator,
+  updateFacilitator,
   checkFacilitatorEmail,
 };

@@ -1,22 +1,33 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
-const app = express();
+const helmet = require("helmet");
 const http = require("http");
+const { Server } = require("socket.io");
+
+const { requestLogger } = require("./src/utils/logger");
+const { apiLimiter } = require("./src/middleware/rateLimiter.middleware");
+const { errorHandler } = require("./src/middleware/errorHandler.middleware");
+const { registerChatSocket } = require("./src/sockets/chat.socket");
+
+const app = express();
 const server = http.createServer(app);
-const { Server } = require("socket.io"); // For real time data transfer
 const io = new Server(server);
-const messages = [];
 
-var corsOptions = {
-  origin: "*",
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || "*",
   headers: "Origin, X-Requested-With, Content-Type, Accept",
-}; //For data send to server
+};
 
-// Middleware
+// Security & utility middleware
+app.use(helmet());
 app.use(cors(corsOptions));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger);
+app.use(express.json({ limit: "10mb" }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// Global rate limiter
+app.use("/api", apiLimiter);
 
 // Routes
 const user_router = require("./routes/userRouter");
@@ -26,30 +37,19 @@ app.use("/api/users", user_router);
 app.use("/api/facilitators", facilitator_router);
 app.use("/api/queries", query_router);
 
-// Testing API
+// Health-check endpoint
 app.get("/", (req, res) => {
-  res.json({ message: "Hello From API" });
+  res.json({ message: "TrackMe API is running", status: "ok" });
 });
 
-// Socket.io
-io.on("connection", (socket) => {
-  const username = socket.handshake.query.username;
-  socket.on("message", (data) => {
-    const message = {
-      message: data.message,
-      senderUsername: username,
-      sentAt: Date.now(),
-    };
-    messages.push(message);
-    console.log(messages);
-    io.emit("message", message);
-  });
-});
+// Socket.io – private room chat
+registerChatSocket(io);
 
-// Port
+// Centralized error handler (must be last)
+app.use(errorHandler);
+
+// Start server
 const PORT = process.env.APP_PORT || 3010;
-
-// Listen to the server
 server.listen(PORT, () => {
-  console.log(`Server is running on ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });
