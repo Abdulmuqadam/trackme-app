@@ -31,9 +31,10 @@ const signupOrganization = async (req, res) => {
     // Generate API key
     const apiKey = Organization.generateApiKey();
 
-    // Set trial window – 14 days from now
+    // Set trial window from env or default 14 days
+    const trialDays = parseInt(process.env.TRIAL_PERIOD_DAYS || "14", 10);
     const trialEndsAt = new Date();
-    trialEndsAt.setDate(trialEndsAt.getDate() + 14);
+    trialEndsAt.setDate(trialEndsAt.getDate() + trialDays);
 
     // Create organization
     const organization = await Organization.create(
@@ -69,6 +70,9 @@ const signupOrganization = async (req, res) => {
     // Issue JWT containing organization context
     const token = jwt.generateJwtToken("admin", adminUser.id, organization.id);
 
+    const dashboardBaseUrl =
+      process.env.DASHBOARD_BASE_URL || "https://{subdomain}.trackme.app/dashboard";
+
     res.status(201).json({
       organization: {
         id: organization.id,
@@ -76,7 +80,7 @@ const signupOrganization = async (req, res) => {
         subdomain: organization.subdomain,
         api_key: apiKey,
         trial_ends_at: organization.trial_ends_at,
-        dashboard_url: `https://${subdomain}.trackme.app/dashboard`,
+        dashboard_url: dashboardBaseUrl.replace("{subdomain}", subdomain),
       },
       admin_token: token,
     });

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/main.dart';
 import 'package:frontend_app_flutter/screens/facilitator_signup.dart';
+import 'package:frontend_app_flutter/screens/org_error_screen.dart';
 import 'package:frontend_app_flutter/screens/user_signup.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import '../misc/flash_message_screen.dart';
@@ -93,6 +94,19 @@ class _LogInFormState extends State<LogInForm> {
   // Main APi Calling Functions
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  TextEditingController orgSubdomainController = TextEditingController();
+
+  /// Builds common headers including the organization subdomain when provided.
+  /// HTTP header names are case-insensitive (RFC 7230); the backend middleware
+  /// normalises via req.headers which are lowercased by Node/Express.
+  Map<String, String> _buildHeaders() {
+    final headers = <String, String>{'Content-Type': 'application/json'};
+    final subdomain = orgSubdomainController.text.trim();
+    if (subdomain.isNotEmpty) {
+      headers['x-organization-subdomain'] = subdomain;
+    }
+    return headers;
+  }
 
   Future<void> loginUser() async {
     try {
@@ -100,7 +114,7 @@ class _LogInFormState extends State<LogInForm> {
 
       final response = await http.post(
         Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
+        headers: _buildHeaders(),
         body: jsonEncode({
           'email': emailController.text.trim(),
           'password': passwordController.text,
@@ -113,12 +127,32 @@ class _LogInFormState extends State<LogInForm> {
         await StorageService.saveToken(token);
         await StorageService.saveUserId(data["userId"].toString());
         await StorageService.saveUserType("user");
+        final subdomain = orgSubdomainController.text.trim();
+        if (subdomain.isNotEmpty) {
+          await StorageService.saveOrgSubdomain(subdomain);
+        }
         if (kDebugMode) {
           print(data["userId"]);
         }
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainPage()),
+        );
+      } else if (response.statusCode == 404) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                const OrgErrorScreen(errorType: OrgErrorType.notFound),
+          ),
+        );
+      } else if (response.statusCode == 403) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const OrgErrorScreen(
+                errorType: OrgErrorType.subscriptionInactive),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -143,7 +177,7 @@ class _LogInFormState extends State<LogInForm> {
 
       final response = await http.post(
         Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
+        headers: _buildHeaders(),
         body: jsonEncode({
           'email': emailController.text.trim(),
           'password': passwordController.text,
@@ -156,12 +190,32 @@ class _LogInFormState extends State<LogInForm> {
         await StorageService.saveToken(token);
         await StorageService.saveUserId(data["userId"].toString());
         await StorageService.saveUserType("facilitator");
+        final subdomain = orgSubdomainController.text.trim();
+        if (subdomain.isNotEmpty) {
+          await StorageService.saveOrgSubdomain(subdomain);
+        }
         if (kDebugMode) {
           print(data["userId"]);
         }
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainPage()),
+        );
+      } else if (response.statusCode == 404) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                const OrgErrorScreen(errorType: OrgErrorType.notFound),
+          ),
+        );
+      } else if (response.statusCode == 403) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const OrgErrorScreen(
+                errorType: OrgErrorType.subscriptionInactive),
+          ),
         );
       } else {
         if (kDebugMode) {
@@ -214,6 +268,39 @@ class _LogInFormState extends State<LogInForm> {
             onToggle: (index) {
               currentSwitchIndex = index!;
             },
+          ),
+          const SizedBox(
+            height: 20,
+          ),
+
+          // Organization subdomain field (optional – leave blank for standalone use)
+          TextFormField(
+            controller: orgSubdomainController,
+            decoration: InputDecoration(
+                labelText: "Organization (optional)",
+                hintText: "e.g. nypd",
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                floatingLabelStyle: TextStyle(
+                  color: secondaryColor,
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 20,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28),
+                  borderSide: const BorderSide(color: Colors.black),
+                  gapPadding: 10,
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(28),
+                  borderSide: BorderSide(color: secondaryColor),
+                  gapPadding: 10,
+                ),
+                suffixIcon: const Padding(
+                  padding: EdgeInsets.fromLTRB(0, 20, 20, 20),
+                  child: Icon(Icons.business_rounded),
+                )),
           ),
           const SizedBox(
             height: 20,

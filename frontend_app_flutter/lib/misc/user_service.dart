@@ -6,6 +6,20 @@ import '../core/storage/storage_service.dart';
 import 'const.dart';
 
 class UserService {
+  /// Builds common headers including org context when available.
+  static Future<Map<String, String>> _buildHeaders() async {
+    final headers = <String, String>{'content-type': 'application/json'};
+    final subdomain = await StorageService.getOrgSubdomain();
+    if (subdomain != null && subdomain.isNotEmpty) {
+      headers['x-organization-subdomain'] = subdomain;
+    }
+    final token = await StorageService.getToken();
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
+    return headers;
+  }
+
   static Future<Map<String, String>> getUserInfo() async {
     try {
       final user = await StorageService.getUserType();
@@ -24,9 +38,10 @@ class UserService {
         apiUrl = '$Api_Link/api/facilitators/getfacilitator';
       }
 
+      final headers = await _buildHeaders();
       final response = await http.post(
         Uri.parse(apiUrl),
-        headers: {'content-type': 'application/json'},
+        headers: headers,
         body: jsonEncode({'userId': userId}),
       );
 
