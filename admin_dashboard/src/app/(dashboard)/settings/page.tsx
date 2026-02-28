@@ -1,73 +1,105 @@
 "use client";
 import useSWR from "swr";
+import { useState } from "react";
 import { api } from "@/lib/api";
 import type { Organization } from "@/types";
 
 const fetcher = (url: string) => api.get(url).then((r) => r.data);
 
+function SectionCard({ title, desc, children }: { title: string; desc?: string; children: React.ReactNode }) {
+  return (
+    <div className="card p-6">
+      <div className="mb-5 border-b border-slate-100 pb-4">
+        <h2 className="font-semibold text-slate-900">{title}</h2>
+        {desc && <p className="mt-0.5 text-xs text-slate-500">{desc}</p>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
 export default function SettingsPage() {
   const { data: org } = useSWR<Organization>("/api/organizations/me", fetcher);
+  const [copied, setCopied] = useState(false);
+
+  const copyKey = () => {
+    if (org?.api_key) {
+      navigator.clipboard.writeText(org.api_key);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   return (
-    <div className="max-w-2xl">
-      <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-      <p className="mt-1 text-sm text-gray-500">Organization configuration.</p>
+    <div className="max-w-2xl space-y-6 animate-fade-in">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+        <p className="mt-0.5 text-sm text-slate-500">Manage your organization configuration.</p>
+      </div>
 
-      <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-gray-800">
-          Organization Details
-        </h2>
-        <div className="mt-4 space-y-4">
+      <SectionCard title="Organization Details" desc="Update your organization's public information.">
+        <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-600">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
               Organization Name
             </label>
             <input
               type="text"
               defaultValue={org?.name ?? ""}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none"
+              className="input-base"
+              placeholder="Organization name"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-gray-600">
+            <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-slate-500">
               Subdomain
             </label>
-            <div className="flex items-center gap-2">
+            <div className="flex overflow-hidden rounded-[0.625rem] border-1.5 border-slate-200 bg-slate-50 focus-within:border-rose-500 focus-within:ring-3 focus-within:ring-rose-500/12">
               <input
                 type="text"
                 defaultValue={org?.subdomain ?? ""}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none"
+                className="flex-1 bg-transparent px-3.5 py-2.5 text-sm text-slate-900 outline-none"
               />
-              <span className="text-sm text-gray-500">.trackme.app</span>
+              <span className="flex items-center bg-slate-100 px-3 text-xs text-slate-500 border-l border-slate-200">
+                .trackme.app
+              </span>
             </div>
           </div>
+          <button className="rounded-[0.625rem] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:-translate-y-0.5"
+            style={{ background: "linear-gradient(135deg,#f43f5e,#be123c)" }}>
+            Save Changes
+          </button>
         </div>
-        <button className="mt-6 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700">
-          Save Changes
-        </button>
-      </div>
+      </SectionCard>
 
       {org?.api_key && (
-        <div className="mt-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-800">API Key</h2>
-          <p className="mt-1 text-xs text-gray-500">
-            Use this key in the{" "}
-            <code className="font-mono text-red-600">X-API-Key</code> header
-            for mobile/API access.
-          </p>
-          <div className="mt-3 flex items-center gap-2">
-            <code className="flex-1 select-all rounded-lg bg-gray-100 px-3 py-2 font-mono text-xs text-gray-700">
+        <SectionCard
+          title="API Key"
+          desc="Use this key in the X-API-Key header for mobile and API clients.">
+          <div className="flex items-center gap-3">
+            <code className="flex-1 select-all overflow-hidden text-ellipsis rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 font-mono text-xs text-slate-700">
               {org.api_key}
             </code>
-            <button
-              onClick={() => navigator.clipboard.writeText(org.api_key!)}
-              className="rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium hover:bg-gray-50"
-            >
-              Copy
+            <button onClick={copyKey}
+              className={`shrink-0 rounded-[0.625rem] px-4 py-2.5 text-xs font-semibold transition-all ${
+                copied
+                  ? "bg-emerald-100 text-emerald-700"
+                  : "border border-slate-200 text-slate-600 hover:border-rose-300 hover:text-rose-600"
+              }`}>
+              {copied ? "✓ Copied" : "Copy"}
             </button>
           </div>
-        </div>
+          <p className="mt-3 text-xs text-slate-400">
+            Keep this key secret. Rotate it if you believe it has been compromised.
+          </p>
+        </SectionCard>
       )}
+
+      <SectionCard title="Danger Zone" desc="Irreversible actions for your organization.">
+        <button className="rounded-[0.625rem] border border-rose-200 px-5 py-2.5 text-sm font-semibold text-rose-600 transition-all hover:bg-rose-50">
+          Delete Organization
+        </button>
+      </SectionCard>
     </div>
   );
 }

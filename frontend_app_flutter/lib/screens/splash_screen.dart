@@ -7,7 +7,7 @@ import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/screens/location_fetcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend_app_flutter/screens/login_screen.dart';
-import 'package:connectivity/connectivity.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 import '../core/storage/storage_service.dart';
 import '../misc/flash_message_screen.dart';
@@ -27,7 +27,9 @@ class _SplashScreenState extends State<SplashScreen>
   final LocationFetcher _locationFetcher = LocationFetcher();
 
   Future<void> checkConnectivity() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
+    final results = await Connectivity().checkConnectivity();
+    final connectivityResult =
+        results.isNotEmpty ? results.first : ConnectivityResult.none;
     setState(() {
       _connectivityResult = connectivityResult;
     });
