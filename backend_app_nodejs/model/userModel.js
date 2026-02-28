@@ -36,6 +36,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.BLOB,
       allowNull: true,
     },
+    organization_id: {
+      type: DataTypes.UUID,
+      allowNull: true,
+    },
   });
 
   return User;

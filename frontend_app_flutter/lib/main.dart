@@ -11,6 +11,7 @@ import 'package:frontend_app_flutter/screens/profile_screen.dart';
 import 'package:frontend_app_flutter/screens/splash_screen.dart';
 import 'package:frontend_app_flutter/screens/user_home.dart';
 import 'package:provider/provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,10 +21,23 @@ void main() async {
   SecurityContext.defaultContext
       .setTrustedCertificatesBytes(data.buffer.asUint8List());
 
-  runApp(ChangeNotifierProvider(
-    create: (context) => MessageProvider(),
-    child: const MyApp(),
-  ));
+  await SentryFlutter.init(
+    (options) {
+      options.dsn = const String.fromEnvironment(
+        'SENTRY_DSN',
+        defaultValue: '',
+      );
+      options.tracesSampleRate = 0.2;
+      options.environment =
+          const String.fromEnvironment('APP_ENV', defaultValue: 'development');
+    },
+    appRunner: () => runApp(
+      ChangeNotifierProvider(
+        create: (context) => MessageProvider(),
+        child: const MyApp(),
+      ),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

@@ -20,7 +20,7 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    audio: {
+    audio_url: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -34,6 +34,10 @@ module.exports = (sequelize, DataTypes) => {
     },
     completed: {
       type: DataTypes.BOOLEAN,
+      allowNull: true,
+    },
+    organization_id: {
+      type: DataTypes.UUID,
       allowNull: true,
     },
   });

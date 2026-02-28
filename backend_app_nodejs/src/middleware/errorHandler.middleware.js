@@ -1,3 +1,5 @@
+const Sentry = require("@sentry/node");
+
 /**
  * Centralized error-handling middleware.
  * Must be registered LAST with app.use() after all routes.
@@ -6,6 +8,11 @@
 const errorHandler = (err, req, res, next) => {
   const statusCode = err.statusCode || 500;
   const message = err.message || "Internal Server Error";
+
+  // Report unexpected server errors to Sentry
+  if (statusCode >= 500 && process.env.SENTRY_DSN) {
+    Sentry.captureException(err);
+  }
 
   if (process.env.NODE_ENV !== "production") {
     console.error(`[${req.method}] ${req.path} — ${statusCode}: ${message}`);
