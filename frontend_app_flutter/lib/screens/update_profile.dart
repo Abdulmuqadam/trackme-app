@@ -7,8 +7,9 @@ import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend_app_flutter/screens/profile_screen.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+
+import '../core/storage/storage_service.dart';
 
 class UpdateProfile extends StatefulWidget {
   const UpdateProfile({super.key});
@@ -165,8 +166,7 @@ class _UpdateUserFormState extends State<UpdateUserForm> {
   }
 
   void userIdentification() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final user = prefs.getString("user_type");
+    final user = await StorageService.getUserType();
     if (user != null) {
       if (kDebugMode) {
         print("hello");
@@ -182,8 +182,8 @@ class _UpdateUserFormState extends State<UpdateUserForm> {
 
   Future<void> updateUser() async {
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final userId = prefs.getInt("user_id");
+      final userIdStr = await StorageService.getUserId();
+      final userId = int.tryParse(userIdStr ?? '');
       String apiUrl = "$Api_Link/api/users/update/$userId";
 
       final response = await http.post(

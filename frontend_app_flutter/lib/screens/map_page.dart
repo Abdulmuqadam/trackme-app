@@ -7,6 +7,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/storage/storage_service.dart';
 import '../misc/const.dart';
 import 'package:custom_info_window/custom_info_window.dart';
 
@@ -114,8 +115,9 @@ class _MapPageState extends State<MapPage> {
     _addPolylines(_currentPosition);
   }
 
-  void _startSendingLocationIfFacilitator() {
-    if (_preferences.getString('user_type') == 'facilitator') {
+  void _startSendingLocationIfFacilitator() async {
+    final userType = await StorageService.getUserType();
+    if (userType == 'facilitator') {
       _startSendingLocation();
     }
   }
@@ -139,11 +141,11 @@ class _MapPageState extends State<MapPage> {
   //   Coordinate startPoint = _currentPosition;
   // }
 
-  void _initializeUsername() {
-    final username = _preferences.getString("username") ?? "";
+  void _initializeUsername() async {
+    final usernameVal = await StorageService.getUsername() ?? "";
     final complainername = _preferences.getString("complainer_name") ?? "";
     setState(() {
-      this.username = username;
+      username = usernameVal;
       this.complainername = complainername;
     });
   }
@@ -271,7 +273,8 @@ class _MapPageState extends State<MapPage> {
   }
 
   Future<void> _sendLocationToBackend() async {
-    final userId = _preferences.getInt("user_id");
+    final userIdStr = await StorageService.getUserId();
+    final userId = int.tryParse(userIdStr ?? '');
     if (userId == null) return;
 
     const url = '$Api_Link/api/queries/updatelocation';

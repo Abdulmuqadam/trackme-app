@@ -1,11 +1,12 @@
 const facilitatorController = require("../controllers/facilitatorController");
 const { authenticateToken } = require("../src/middleware/auth.middleware");
-const { authLimiter } = require("../src/middleware/rateLimiter.middleware");
+const { authLimiter, signupLimiter } = require("../src/middleware/rateLimiter.middleware");
+const { facilitatorSignupValidators, loginValidators } = require("../src/middleware/validators");
 const router = require("express").Router();
 
 // Public routes
-router.post("/signup", authLimiter, facilitatorController.signUp);
-router.post("/login", authLimiter, facilitatorController.login);
+router.post("/signup", signupLimiter, facilitatorSignupValidators, facilitatorController.signUp);
+router.post("/login", authLimiter, loginValidators, facilitatorController.login);
 router.post("/verify", facilitatorController.checkFacilitatorIsValid);
 router.get("/emailchecker", facilitatorController.checkFacilitatorEmail);
 

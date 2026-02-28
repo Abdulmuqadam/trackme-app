@@ -1,17 +1,16 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/storage/storage_service.dart';
 import 'const.dart';
 
 class UserService {
   static Future<Map<String, String>> getUserInfo() async {
     try {
-      final SharedPreferences preferences =
-          await SharedPreferences.getInstance();
-      final user = preferences.getString("user_type");
-      final userId = preferences.getInt("user_id");
+      final user = await StorageService.getUserType();
+      final userIdStr = await StorageService.getUserId();
+      final userId = int.tryParse(userIdStr ?? '');
 
       if (userId == null) {
         if (kDebugMode) {
@@ -39,8 +38,8 @@ class UserService {
         final String username = data["firstname"] + " " + data["lastname"];
         final String email = data["email"];
 
-        // Save username to SharedPreferences
-        preferences.setString("username", username);
+        // Save username to secure storage
+        await StorageService.saveUsername(username);
         if (kDebugMode) {
           print({'email': email, 'username': username});
         }

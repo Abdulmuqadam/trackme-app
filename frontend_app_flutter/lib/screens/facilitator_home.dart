@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import '../core/storage/storage_service.dart';
 import '../misc/const.dart';
 import '../misc/user_service.dart';
 import 'location_fetcher.dart';
@@ -36,8 +37,8 @@ class _FacilitatorHomeContentState extends State<FacilitatorHomeContent> {
   }
 
   Future<void> getQueryDataByFacilitatorId() async {
-    final SharedPreferences preferences = await SharedPreferences.getInstance();
-    final userId = preferences.getInt("user_id");
+    final userIdStr = await StorageService.getUserId();
+    final userId = int.tryParse(userIdStr ?? '');
     if (userId == null) return;
 
     const url = '$Api_Link/api/queries/getQueryByFacilitatorId';

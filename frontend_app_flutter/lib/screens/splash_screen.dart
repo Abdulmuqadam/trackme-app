@@ -7,9 +7,9 @@ import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/screens/location_fetcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend_app_flutter/screens/login_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:connectivity/connectivity.dart';
 
+import '../core/storage/storage_service.dart';
 import '../misc/flash_message_screen.dart';
 import '../misc/user_service.dart';
 
@@ -46,8 +46,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<dynamic> sendUserJwtTokenAndSaveResponse() async {
     const apiUrl = '$Api_Link/api/users/verify';
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final jwtToken = prefs.getString('jwt_token');
+      final jwtToken = await StorageService.getToken();
       if (jwtToken == null) {
         Future.delayed(
           const Duration(seconds: 5),
@@ -71,7 +70,7 @@ class _SplashScreenState extends State<SplashScreen>
         if (response.statusCode == 200) {
           final userId = (data["userId"] as num?)?.toInt();
           if (userId != null) {
-            prefs.setInt("user_id", userId);
+            await StorageService.saveUserId(userId.toString());
           }
           Future.delayed(
             const Duration(seconds: 5),
@@ -110,8 +109,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<dynamic> sendFacilitatorJwtTokenAndSaveResponse() async {
     const apiUrl = '$Api_Link/api/facilitators/verify';
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final jwtToken = prefs.getString('jwt_token');
+      final jwtToken = await StorageService.getToken();
       if (jwtToken == null) {
         Future.delayed(
           const Duration(seconds: 5),
@@ -135,7 +133,7 @@ class _SplashScreenState extends State<SplashScreen>
         if (response.statusCode == 200) {
           final userId = (data["userId"] as num?)?.toInt();
           if (userId != null) {
-            prefs.setInt("user_id", userId);
+            await StorageService.saveUserId(userId.toString());
           }
           Future.delayed(
             const Duration(seconds: 5),
@@ -172,8 +170,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<String?> choseUser() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userType = prefs.getString("user_type");
+    final userType = await StorageService.getUserType();
     return userType;
   }
 

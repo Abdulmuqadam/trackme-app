@@ -6,6 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/storage/storage_service.dart';
 import '../misc/const.dart';
 
 class LocationFetcher {
@@ -60,7 +61,8 @@ class LocationFetcher {
       });
 
       // Start sending location to the backend periodically
-      if (_preferences.getString('user_type') == 'facilitator') {
+      final userType = await StorageService.getUserType();
+      if (userType == 'facilitator') {
         _startSendingLocation();
       }
     } catch (e) {
@@ -85,7 +87,8 @@ class LocationFetcher {
   }
 
   Future<void> _sendLocationToBackend(LatLng position) async {
-    final userId = _preferences.getInt("user_id");
+    final userIdStr = await StorageService.getUserId();
+    final userId = int.tryParse(userIdStr ?? '');
     if (userId == null) return;
 
     const url = '$Api_Link/api/queries/updatelocation';
