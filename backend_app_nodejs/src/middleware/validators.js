@@ -32,7 +32,7 @@ const nameValidator = (field) =>
     .isLength({ max: 50 })
     .withMessage(`${field} must be at most 50 characters`)
     .not()
-    .matches(/['";\-\-]/)
+    .matches(/['";]/)
     .withMessage(`${field} contains invalid characters`);
 
 const queryTypeValidator = body("querytype")
@@ -83,6 +83,7 @@ const facilitatorSignupValidators = [
 const saveQueryValidators = [
   body("text").trim().notEmpty().withMessage("Query text is required"),
   queryTypeValidator,
+  locationValidator,
   userIdValidator,
   handleValidationErrors,
 ];
