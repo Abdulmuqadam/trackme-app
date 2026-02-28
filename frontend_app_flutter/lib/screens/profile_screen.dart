@@ -9,6 +9,7 @@ import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
+import '../core/storage/storage_service.dart';
 import 'help_and_support.dart';
 import 'login_screen.dart';
 
@@ -31,14 +32,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> getUserInfo() async {
     String apiUrl;
-    final SharedPreferences preferences = await SharedPreferences.getInstance();
-    final user = preferences.getString("user_type");
+    final user = await StorageService.getUserType();
     if (user == "facilitator") {
       apiUrl = '$Api_Link/api/facilitators/getfacilitator';
     } else {
       apiUrl = '$Api_Link/api/users/getuser';
     }
-    final userId = preferences.getInt("user_id");
+    final userIdStr = await StorageService.getUserId();
+    final userId = int.tryParse(userIdStr ?? '');
     if (kDebugMode) {
       print(userId);
     }
@@ -57,8 +58,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (kDebugMode) {
             print("data is got successfully");
           }
-          preferences.setString(
-              "username", data["firstname"] + " " + data["lastname"]);
+          await StorageService.saveUsername(
+              data["firstname"] + " " + data["lastname"]);
           setState(() {
             email = data["email"];
             username = data["firstname"] + " " + data["lastname"];
@@ -130,7 +131,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void logOut(BuildContext context) async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    // Clear secure session data (JWT, user_id, user_type, username)
+    await StorageService.clearSession();
+    // Clear remaining SharedPreferences data (location cache, etc.)
+    final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
 
     Navigator.pushReplacement(

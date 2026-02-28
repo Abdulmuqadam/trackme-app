@@ -8,6 +8,7 @@ import 'package:frontend_app_flutter/screens/user_home.dart';
 import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../core/storage/storage_service.dart';
 import '../misc/const.dart';
 
 class Queries {
@@ -63,8 +64,7 @@ class _QueriesListPageState extends State<QueriesListPage> {
   }
 
   Future<void> getQueriesForUser() async {
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    final username = preferences.getString("username");
+    final username = await StorageService.getUsername();
 
     const url = "$Api_Link/api/queries/getquerybyusername";
     final Map<String, dynamic> data = {"userName": username};
@@ -446,7 +446,7 @@ class _QueriesCardState extends State<QueriesCard> {
                     IconButton(
                       onPressed: () async {
                         await downloadAudio(
-                            "https://backend.prometheansempiremedia.com/${widget.audioData}");
+                            "${Api_Link}/${widget.audioData}");
                         await playAudio();
                       },
                       icon: const Icon(

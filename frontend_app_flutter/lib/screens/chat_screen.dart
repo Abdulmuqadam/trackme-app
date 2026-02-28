@@ -6,6 +6,8 @@ import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
+import '../core/storage/storage_service.dart';
+
 class ChatScreen extends StatefulWidget {
   const ChatScreen({super.key});
 
@@ -47,7 +49,6 @@ class MessageProvider extends ChangeNotifier {
 
 class _ChatScreenState extends State<ChatScreen> {
   late io.Socket socket;
-  late SharedPreferences preferences;
   late String username;
   late String userType;
   late int recipientId;
@@ -102,10 +103,10 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _initializePreferences() async {
-    preferences = await SharedPreferences.getInstance();
-    username = preferences.getString("username") ?? ""; // Initialize username
-    userType = preferences.getString("user_type") ?? "";
-    recipientId = preferences.getInt("facilitator_id") ??
+    final prefs = await SharedPreferences.getInstance();
+    username = await StorageService.getUsername() ?? "";
+    userType = await StorageService.getUserType() ?? "";
+    recipientId = prefs.getInt("facilitator_id") ??
         0; // Use a default value if facilitator_id is not set
     connectionSocket(); // Call connectionSocket() after username is initialized
   }

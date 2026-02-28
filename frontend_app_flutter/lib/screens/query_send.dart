@@ -14,6 +14,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../core/storage/storage_service.dart';
 import '../misc/flash_message_screen.dart';
 
 class QuerySendPage extends StatelessWidget {
@@ -233,8 +234,8 @@ class _TextBoxState extends State<TextBox> {
     User user,
   ) async {
     const String apiUrl = '$Api_Link/api/queries/save';
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final username = prefs.getString("username");
+    final prefs = await SharedPreferences.getInstance();
+    final username = await StorageService.getUsername();
     final location = prefs.getString("location");
     if (kDebugMode) {
       print(username);

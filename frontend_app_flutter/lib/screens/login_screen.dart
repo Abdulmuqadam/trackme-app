@@ -8,10 +8,10 @@ import 'package:frontend_app_flutter/screens/user_signup.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import '../misc/flash_message_screen.dart';
 import '../misc/user_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import '../core/storage/storage_service.dart';
 
 class LogInScreen extends StatelessWidget {
   const LogInScreen({super.key});
@@ -110,10 +110,9 @@ class _LogInFormState extends State<LogInForm> {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         final String token = data['token'];
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('jwt_token', token);
-        prefs.setInt("user_id", data["userId"]);
-        prefs.setString("user_type", "user");
+        await StorageService.saveToken(token);
+        await StorageService.saveUserId(data["userId"].toString());
+        await StorageService.saveUserType("user");
         if (kDebugMode) {
           print(data["userId"]);
         }
@@ -153,11 +152,10 @@ class _LogInFormState extends State<LogInForm> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
         final String token = data['token'];
-        prefs.setInt("user_id", data["userId"]);
-        prefs.setString("jwt_token", token);
-        prefs.setString("user_type", "facilitator");
+        await StorageService.saveToken(token);
+        await StorageService.saveUserId(data["userId"].toString());
+        await StorageService.saveUserType("facilitator");
         if (kDebugMode) {
           print(data["userId"]);
         }

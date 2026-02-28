@@ -5,8 +5,8 @@ import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/screens/profile_screen.dart';
 import 'package:frontend_app_flutter/screens/queries_list.dart';
 import 'package:frontend_app_flutter/screens/query_send.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/storage/storage_service.dart';
 import '../misc/user_service.dart';
 import 'facilitator_home.dart';
 import 'location_fetcher.dart';
@@ -35,8 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<String?> choseUser() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userType = prefs.getString("user_type");
+    final userType = await StorageService.getUserType();
     return userType;
   }
 

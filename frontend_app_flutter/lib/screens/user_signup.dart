@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/storage/storage_service.dart';
 import '../misc/const.dart';
 import 'login_screen.dart';
 
@@ -204,13 +204,11 @@ class _UserSignUpFormState extends State<UserSignUpForm> {
         final Map<String, dynamic> data = jsonDecode(response.body);
         final String token = data['token'];
         final String message = data['message'];
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString('jwt_token', token);
-        prefs.setInt("user_id", data["userId"]);
+        await StorageService.saveToken(token);
+        await StorageService.saveUserId(data["userId"].toString());
         if (kDebugMode) {
           print(data["userId"]);
         }
-        prefs.setString('message', message);
 
         Navigator.pushReplacement(
           context,

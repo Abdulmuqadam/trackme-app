@@ -5,6 +5,7 @@ import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
+import '../core/storage/storage_service.dart';
 import 'login_screen.dart';
 
 class FacilitatorSignupScreen extends StatelessWidget {
@@ -215,10 +216,9 @@ class _FacilitatorSignupFormState extends State<FacilitatorSignupForm>
         final Map<String, dynamic> data = jsonDecode(response.body);
         final String token = data['token'];
 
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        prefs.setString("jwt_token", token);
-        prefs.setInt("user_id", data["userId"]);
-        prefs.setString("user_type", "facilitator");
+        await StorageService.saveToken(token);
+        await StorageService.saveUserId(data["userId"].toString());
+        await StorageService.saveUserType("facilitator");
 
         Navigator.pushReplacement(
           context,
