@@ -5,11 +5,11 @@ import 'package:flutter/services.dart';
 import 'package:frontend_app_flutter/core/constants/app_constants.dart';
 import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 import 'package:frontend_app_flutter/misc/const.dart';
-import 'package:frontend_app_flutter/screens/chat_screen.dart';
-import 'package:frontend_app_flutter/screens/map_page.dart';
-import 'package:frontend_app_flutter/screens/profile_screen.dart';
+import 'package:frontend_app_flutter/features/chat/screens/chat_screen.dart';
+import 'package:frontend_app_flutter/features/map/screens/map_page.dart';
+import 'package:frontend_app_flutter/features/user/screens/profile_screen.dart';
 import 'package:frontend_app_flutter/screens/splash_screen.dart';
-import 'package:frontend_app_flutter/screens/user_home.dart';
+import 'package:frontend_app_flutter/features/user/screens/user_home.dart';
 import 'package:provider/provider.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
