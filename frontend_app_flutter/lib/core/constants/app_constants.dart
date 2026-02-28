@@ -36,6 +36,12 @@ class AppConstants {
   static const String keyUserType = 'user_type';
   static const String keyUsername = 'username';
   static const String keyUserLocation = 'location';
+
+  // ── Multi-org keys ──────────────────────────────────────────────────────────
+  static const String keyOrgSubdomain = 'org_subdomain';
+  static const String keyOrgId = 'org_id';
+  static const String keyOrgName = 'org_name';
+  static const String keyOrgApiKey = 'org_api_key';
 }
 
 // ── Colours ───────────────────────────────────────────────────────────────────

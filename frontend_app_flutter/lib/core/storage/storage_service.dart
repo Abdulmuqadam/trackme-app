@@ -55,5 +55,35 @@ class StorageService {
     await _storage.delete(key: AppConstants.keyUserId);
     await _storage.delete(key: AppConstants.keyUserType);
     await _storage.delete(key: AppConstants.keyUsername);
+    await _storage.delete(key: AppConstants.keyOrgSubdomain);
+    await _storage.delete(key: AppConstants.keyOrgId);
+    await _storage.delete(key: AppConstants.keyOrgName);
+    await _storage.delete(key: AppConstants.keyOrgApiKey);
   }
+
+  // ── Organization ─────────────────────────────────────────────────────────
+
+  static Future<void> saveOrgSubdomain(String subdomain) =>
+      _storage.write(key: AppConstants.keyOrgSubdomain, value: subdomain);
+
+  static Future<String?> getOrgSubdomain() =>
+      _storage.read(key: AppConstants.keyOrgSubdomain);
+
+  static Future<void> saveOrgId(String id) =>
+      _storage.write(key: AppConstants.keyOrgId, value: id);
+
+  static Future<String?> getOrgId() =>
+      _storage.read(key: AppConstants.keyOrgId);
+
+  static Future<void> saveOrgName(String name) =>
+      _storage.write(key: AppConstants.keyOrgName, value: name);
+
+  static Future<String?> getOrgName() =>
+      _storage.read(key: AppConstants.keyOrgName);
+
+  static Future<void> saveOrgApiKey(String apiKey) =>
+      _storage.write(key: AppConstants.keyOrgApiKey, value: apiKey);
+
+  static Future<String?> getOrgApiKey() =>
+      _storage.read(key: AppConstants.keyOrgApiKey);
 }

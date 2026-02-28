@@ -38,7 +38,7 @@ export default function AnalyticsPage() {
     value,
   }));
 
-  // Build daily line chart (last 7 days)
+  // Build daily line chart (last 7 days) – single pass O(n)
   const now = new Date();
   const days: { date: string; count: number }[] = Array.from({ length: 7 }).map(
     (_, i) => {
@@ -48,19 +48,19 @@ export default function AnalyticsPage() {
     }
   );
   if (Array.isArray(queries)) {
+    // Build a map from date string → day index for O(1) lookup
+    const dayKeyMap = new Map<string, number>();
+    days.forEach((day, idx) => {
+      const d = new Date(now);
+      d.setDate(d.getDate() - (6 - idx));
+      dayKeyMap.set(d.toDateString(), idx);
+    });
+
     queries.forEach((q: any) => {
-      const created = new Date(q.createdAt);
-      days.forEach((day, idx) => {
-        const target = new Date(now);
-        target.setDate(target.getDate() - (6 - idx));
-        if (
-          created.getFullYear() === target.getFullYear() &&
-          created.getMonth() === target.getMonth() &&
-          created.getDate() === target.getDate()
-        ) {
-          day.count += 1;
-        }
-      });
+      const idx = dayKeyMap.get(new Date(q.createdAt).toDateString());
+      if (idx !== undefined) {
+        days[idx].count += 1;
+      }
     });
   }
 
