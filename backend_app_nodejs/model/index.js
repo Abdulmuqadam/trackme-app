@@ -33,10 +33,21 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
+db.Organizations = require("./organizationModel")(sequelize, DataTypes);
 db.Users = require("./userModel")(sequelize, DataTypes);
 db.facilitators = require("./facilitatorModel")(sequelize, DataTypes);
 db.Queries = require("./queryModel")(sequelize, DataTypes);
 db.Messages = require("./messageModel")(sequelize, DataTypes);
+
+// Associations
+db.Organizations.hasMany(db.Users, { foreignKey: "organization_id" });
+db.Users.belongsTo(db.Organizations, { foreignKey: "organization_id" });
+
+db.Organizations.hasMany(db.facilitators, { foreignKey: "organization_id" });
+db.facilitators.belongsTo(db.Organizations, { foreignKey: "organization_id" });
+
+db.Organizations.hasMany(db.Queries, { foreignKey: "organization_id" });
+db.Queries.belongsTo(db.Organizations, { foreignKey: "organization_id" });
 
 db.sequelize
   .sync({

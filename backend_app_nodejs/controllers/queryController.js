@@ -1,5 +1,9 @@
 const db = require("../model");
 const { getDistance } = require("geolib");
+const { upload, uploadAudioToS3 } = require("../src/middleware/upload.middleware");
+const { GetObjectCommand } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const s3 = require("../config/s3");
 
 const Query = db.Queries;
 const Facilitator = db.facilitators;
@@ -26,12 +30,12 @@ const parseCoords = (coordStr) => {
 
 const saveQuery = async (req, res) => {
   try {
-    const { text, querytype, audio, postedBy, completed, location } = req.body;
+    const { text, querytype, postedBy, completed, location } = req.body;
 
-    if (!querytype || !postedBy || !audio) {
+    if (!querytype || !postedBy || !req.file) {
       return res
         .status(400)
-        .json({ error: "querytype, postedBy, and audio are required" });
+        .json({ error: "querytype, postedBy, and audio file are required" });
     }
 
     const role = QUERY_TYPE_TO_ROLE[querytype];
@@ -43,6 +47,9 @@ const saveQuery = async (req, res) => {
     if (!baseCoords) {
       return res.status(400).json({ error: "Invalid or missing location" });
     }
+
+    // Upload audio to S3
+    const audioKey = await uploadAudioToS3(req.file);
 
     const facilitators = await Facilitator.findAll({ where: { role } });
 
@@ -75,7 +82,7 @@ const saveQuery = async (req, res) => {
     await Query.create({
       text,
       querytype,
-      audio,
+      audio_url: audioKey,
       postedBy,
       assignedTo: nearestFacilitator.id,
       completed,
@@ -178,10 +185,34 @@ const updateCompletion = async (req, res) => {
   }
 };
 
+/**
+ * GET /api/queries/:id/audio-url
+ * Returns a pre-signed S3 URL valid for 1 hour.
+ */
+const getAudioUrl = async (req, res) => {
+  try {
+    const query = await Query.findByPk(req.params.id);
+    if (!query || !query.audio_url) {
+      return res.status(404).json({ error: "Audio not found" });
+    }
+    const command = new GetObjectCommand({
+      Bucket: process.env.S3_BUCKET_NAME,
+      Key: query.audio_url,
+    });
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    res.json({ url });
+  } catch (error) {
+    console.error("Error generating audio URL:", error);
+    res.status(500).json({ error: "Failed to generate audio URL" });
+  }
+};
+
 module.exports = {
   saveQuery,
   postLocation,
   getQueryByFacilitatorid,
   updateCompletion,
   getQueryByUserName,
+  getAudioUrl,
+  uploadMiddleware: upload.single("audio"),
 };
