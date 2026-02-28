@@ -1,1 +1,1 @@
-module.exports = require('./src/shared/config/database');
+module.exports = require('../src/shared/config/database');

@@ -1,1 +1,1 @@
-module.exports = require('./src/shared/config/s3');
+module.exports = require('../src/shared/config/s3');

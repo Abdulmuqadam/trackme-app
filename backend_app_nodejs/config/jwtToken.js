@@ -1,1 +1,1 @@
-module.exports = require('./src/shared/config/jwtToken');
+module.exports = require('../src/shared/config/jwtToken');
