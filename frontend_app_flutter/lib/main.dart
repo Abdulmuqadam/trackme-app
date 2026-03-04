@@ -10,7 +10,7 @@ import 'package:frontend_app_flutter/features/map/screens/map_page.dart';
 import 'package:frontend_app_flutter/features/user/screens/profile_screen.dart';
 import 'package:frontend_app_flutter/screens/splash_screen.dart';
 import 'package:frontend_app_flutter/features/user/screens/user_home.dart';
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
@@ -31,12 +31,7 @@ void main() async {
       options.environment =
           const String.fromEnvironment('APP_ENV', defaultValue: 'development');
     },
-    appRunner: () => runApp(
-      ChangeNotifierProvider(
-        create: (context) => MessageProvider(),
-        child: const MyApp(),
-      ),
-    ),
+    appRunner: () => runApp(const MyApp()),
   );
 }
 
@@ -45,7 +40,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       home: const SplashScreen(),

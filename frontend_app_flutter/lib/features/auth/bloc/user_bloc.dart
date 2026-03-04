@@ -1,15 +1,15 @@
 // user_bloc.dart
 
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 
 enum UserType { normalUser, facilitatorUser }
 
-class UserBloc extends Cubit<UserType> {
-  UserBloc() : super(UserType.normalUser);
+class UserController extends GetxController {
+  final userType = UserType.normalUser.obs;
 
   void toggleUserType() {
-    emit(state == UserType.normalUser
+    userType.value = userType.value == UserType.normalUser
         ? UserType.facilitatorUser
-        : UserType.normalUser);
+        : UserType.normalUser;
   }
 }

@@ -1,4 +1,4 @@
-import 'package:provider/provider.dart';
+import 'package:get/get.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -7,13 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as io;
 
 import 'package:frontend_app_flutter/core/storage/storage_service.dart';
-
-class ChatScreen extends StatefulWidget {
-  const ChatScreen({super.key});
-
-  @override
-  State<ChatScreen> createState() => _ChatScreenState();
-}
 
 class Message {
   final String message;
@@ -35,16 +28,22 @@ class Message {
   }
 }
 
-class MessageProvider extends ChangeNotifier {
-  final List<Message> _messages = [];
-  List<Message> get messages => _messages.reversed.toList();
+/// GetX controller – replaces the old ChangeNotifier-based MessageProvider.
+class MessageController extends GetxController {
+  final messages = <Message>[].obs;
 
-  MessageProvider();
+  List<Message> get reversedMessages => messages.reversed.toList();
 
   void addNewMessage(Message message) {
-    _messages.add(message);
-    notifyListeners();
+    messages.add(message);
   }
+}
+
+class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
@@ -53,6 +52,10 @@ class _ChatScreenState extends State<ChatScreen> {
   late String userType;
   late int recipientId;
   final TextEditingController messageInputController = TextEditingController();
+
+  // Controller is registered in initState and deleted in dispose so it is
+  // properly scoped to the ChatScreen widget's lifecycle.
+  late final MessageController _messageController;
 
   void connectionSocket() {
     socket = io.io(
@@ -73,20 +76,15 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     socket.on(
       "message",
-      (data) =>
-          Provider.of<MessageProvider>(context, listen: false).addNewMessage(
-        Message.fromJson(data),
-      ),
+      (data) => _messageController.addNewMessage(Message.fromJson(data)),
     );
   }
 
   void sendMessage() {
     try {
-      // int recipientId
       socket.emit("message", {
         "message": messageInputController.text.trim(),
         "username": username,
-        // "recipientId": recipientId
       });
       messageInputController.clear();
     } catch (e) {
@@ -99,6 +97,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+    _messageController = Get.put(MessageController());
     _initializePreferences();
   }
 
@@ -106,9 +105,14 @@ class _ChatScreenState extends State<ChatScreen> {
     final prefs = await SharedPreferences.getInstance();
     username = await StorageService.getUsername() ?? "";
     userType = await StorageService.getUserType() ?? "";
-    recipientId = prefs.getInt("facilitator_id") ??
-        0; // Use a default value if facilitator_id is not set
-    connectionSocket(); // Call connectionSocket() after username is initialized
+    recipientId = prefs.getInt("facilitator_id") ?? 0;
+    connectionSocket();
+  }
+
+  @override
+  void dispose() {
+    Get.delete<MessageController>();
+    super.dispose();
   }
 
   @override
@@ -133,73 +137,73 @@ class _ChatScreenState extends State<ChatScreen> {
         child: Column(
           children: [
             Expanded(
-              child: Consumer<MessageProvider>(
-                builder: (context, messageProvider, _) {
-                  return ListView.builder(
-                    reverse: true,
-                    itemCount: messageProvider.messages.length,
-                    itemBuilder: (context, index) {
-                      final Message message = messageProvider.messages[index];
-                      final bool isSentByCurrentUser =
-                          message.senderUsername == username;
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: 4.0,
-                          horizontal: 8.0,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: isSentByCurrentUser
-                              ? MainAxisAlignment.end
-                              : MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Flexible(
-                              child: Container(
-                                padding: const EdgeInsets.all(8.0),
-                                decoration: BoxDecoration(
-                                  color: isSentByCurrentUser
-                                      ? secondaryColor
-                                      : Colors.deepOrangeAccent,
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Container(
-                                      width: 4.0,
-                                      height: 4.0,
-                                      decoration: const BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: Colors.white,
-                                      ),
+              // Obx replaces Consumer<MessageProvider>
+              child: Obx(() {
+                final msgs = _messageController.reversedMessages;
+                return ListView.builder(
+                  reverse: true,
+                  itemCount: msgs.length,
+                  itemBuilder: (context, index) {
+                    final Message message = msgs[index];
+                    final bool isSentByCurrentUser =
+                        message.senderUsername == username;
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 4.0,
+                        horizontal: 8.0,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: isSentByCurrentUser
+                            ? MainAxisAlignment.end
+                            : MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color: isSentByCurrentUser
+                                    ? secondaryColor
+                                    : Colors.deepOrangeAccent,
+                                borderRadius: BorderRadius.circular(10.0),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Container(
+                                    width: 4.0,
+                                    height: 4.0,
+                                    decoration: const BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white,
                                     ),
-                                    Text(
-                                      message.message,
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16.0,
-                                      ),
+                                  ),
+                                  Text(
+                                    message.message,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16.0,
                                     ),
-                                    const SizedBox(height: 4.0),
-                                    Text(
-                                      DateFormat('hh:mm a')
-                                          .format(message.sentAt),
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 12.0,
-                                      ),
+                                  ),
+                                  const SizedBox(height: 4.0),
+                                  Text(
+                                    DateFormat('hh:mm a')
+                                        .format(message.sentAt),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 12.0,
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              }),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -215,7 +219,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           .withOpacity(0.7),
                       spreadRadius: 1,
                       blurRadius: 2,
-                      offset: const Offset(0, 2), // changes position of shadow
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),
@@ -248,7 +252,6 @@ class _ChatScreenState extends State<ChatScreen> {
               child: IconButton(
                 icon: const Icon(Icons.send_rounded),
                 onPressed: () {
-                  // handleSubmitted(messageInputController.text);
                   if (messageInputController.text.trim().isNotEmpty) {
                     sendMessage();
                   } else {
