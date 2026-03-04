@@ -1,16 +1,3 @@
-import 'package:audio_waveforms/audio_waveforms.dart';
-
-class RecordManager{
-  late final RecorderController recorderController;
-  String? recordingPath;
-
-  void initialiseController() {
-    recorderController = RecorderController()
-      ..androidEncoder = AndroidEncoder.aac
-      ..androidOutputFormat = AndroidOutputFormat.mpeg4
-      ..iosEncoder = IosEncoder.kAudioFormatMPEG4AAC
-      ..sampleRate = 16000;
-  }
-
-
-}
+// Re-exported from feature-first location. New code should import:
+// package:frontend_app_flutter/features/audio/services/recorder.dart
+export 'package:frontend_app_flutter/features/audio/services/recorder.dart';

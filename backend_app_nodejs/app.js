@@ -4,13 +4,25 @@ const cors = require("cors");
 const helmet = require("helmet");
 const http = require("http");
 const { Server } = require("socket.io");
+const Sentry = require("@sentry/node");
 
-const { requestLogger } = require("./src/utils/logger");
-const { apiLimiter } = require("./src/middleware/rateLimiter.middleware");
-const { errorHandler } = require("./src/middleware/errorHandler.middleware");
-const { registerChatSocket } = require("./src/sockets/chat.socket");
+const { requestLogger } = require("./src/shared/utils/logger");
+const { apiLimiter } = require("./src/shared/middleware/rateLimiter.middleware");
+const { errorHandler } = require("./src/shared/middleware/errorHandler.middleware");
+const { registerChatSocket } = require("./src/features/chat/chat.socket");
 
 const app = express();
+
+// ── Sentry (must be initialized before any other middleware) ──────────────────
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || "development",
+    tracesSampleRate: process.env.NODE_ENV === "production" ? 0.2 : 1.0,
+  });
+  app.use(Sentry.expressErrorHandler());
+}
+
 const server = http.createServer(app);
 const io = new Server(server);
 
@@ -29,13 +41,11 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // Global rate limiter
 app.use("/api", apiLimiter);
 
-// Routes
-const user_router = require("./routes/userRouter");
-const facilitator_router = require("./routes/facilitatorRouter");
-const query_router = require("./routes/queryRouter");
-app.use("/api/users", user_router);
-app.use("/api/facilitators", facilitator_router);
-app.use("/api/queries", query_router);
+// Feature routes
+app.use("/api/users", require("./src/features/users/user.routes"));
+app.use("/api/facilitators", require("./src/features/facilitators/facilitator.routes"));
+app.use("/api/queries", require("./src/features/queries/query.routes"));
+app.use("/api/organizations", require("./src/features/organizations/organization.routes"));
 
 // Health-check endpoint
 app.get("/", (req, res) => {
