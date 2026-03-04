@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:frontend_app_flutter/misc/const.dart';
+import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 import 'package:frontend_app_flutter/features/auth/screens/login_screen.dart';
 
 enum OrgErrorType { notFound, subscriptionInactive }
@@ -14,70 +14,90 @@ class OrgErrorScreen extends StatelessWidget {
     final isNotFound = errorType == OrgErrorType.notFound;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.surface,
       body: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  isNotFound ? Icons.search_off_rounded : Icons.block_rounded,
-                  size: 80,
-                  color: secondaryColor,
-                ),
-                const SizedBox(height: 24),
-                Text(
-                  isNotFound
-                      ? 'Organization Not Found'
-                      : 'Subscription Inactive',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: thirdColor,
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Error icon
+              Center(
+                child: Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  isNotFound
-                      ? 'The organization you entered does not exist. Please check the subdomain and try again.'
-                      : 'Your organization\'s subscription has expired or is inactive. Please contact your administrator.',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: thirdColor.withOpacity(0.7),
+                  child: Icon(
+                    isNotFound
+                        ? Icons.search_off_rounded
+                        : Icons.block_rounded,
+                    size: 48,
+                    color: AppTheme.primary,
                   ),
-                  textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 36),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const LogInScreen(),
-                        ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: secondaryColor,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+              ),
+              const SizedBox(height: 28),
+
+              // Title
+              Text(
+                isNotFound
+                    ? 'Organization Not Found'
+                    : 'Subscription Inactive',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.5,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+
+              // Description
+              Text(
+                isNotFound
+                    ? 'The organization you entered does not exist. Please check the subdomain and try again.'
+                    : "Your organization's subscription has expired or is inactive. Please contact your administrator.",
+                style: TextStyle(
+                  fontSize: 15,
+                  height: 1.6,
+                  color: AppTheme.textSecondary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 40),
+
+              // CTA button
+              GestureDetector(
+                onTap: () => Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const LogInScreen()),
+                ),
+                child: Container(
+                  height: 54,
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.brandGradient,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                    boxShadow: AppTheme.elevatedShadow,
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Back to Login',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: 0.3,
                       ),
                     ),
-                    child: const Text(
-                      'Back to Login',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

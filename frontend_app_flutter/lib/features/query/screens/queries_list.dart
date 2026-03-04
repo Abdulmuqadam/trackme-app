@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
+import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 import 'package:frontend_app_flutter/screens/user_home.dart';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:frontend_app_flutter/core/storage/storage_service.dart';
@@ -126,8 +126,8 @@ class _QueriesListPageState extends State<QueriesListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.surface,
       appBar: AppBar(
-        elevation: 10,
         leading: IconButton(
           onPressed: () {
             Navigator.pushReplacement(
@@ -135,47 +135,21 @@ class _QueriesListPageState extends State<QueriesListPage> {
               MaterialPageRoute(builder: (context) => const HomeScreen()),
             );
           },
-          icon: const Icon(LineAwesomeIcons.angle_left),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        title: Text(
-          "Queries List",
-          style: TextStyle(
-            color: secondaryColor,
-            fontSize: 35,
-            fontWeight: FontWeight.bold,
+        title: const Text('My Queries'),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh',
+            onPressed: _refreshData,
+            icon: const Icon(Icons.refresh_rounded),
           ),
-        ),
-        centerTitle: true,
-      ),
-      body: isLoading
-          ? Container(
-              color: Colors.white,
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            )
-          : QueriesListContent(
-              queryData: queryData,
-            ),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 25.0),
-            child: FloatingActionButton(
-              onPressed: _refreshData,
-              tooltip: 'Refresh',
-              splashColor: mainColor,
-              foregroundColor: Colors.white,
-              backgroundColor: secondaryColor,
-              child: const Icon(Icons.refresh),
-            ),
-          ),
+          const SizedBox(width: 8),
         ],
       ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : QueriesListContent(queryData: queryData),
     );
   }
 }

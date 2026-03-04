@@ -1,11 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/screens/terms_and_conditions.dart';
 import 'package:frontend_app_flutter/screens/update_profile.dart';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -23,6 +22,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   String email = '';
   String username = '';
+  bool _loading = true;
 
   @override
   void initState() {
@@ -33,254 +33,324 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> getUserInfo() async {
     String apiUrl;
     final user = await StorageService.getUserType();
-    if (user == "facilitator") {
+    if (user == 'facilitator') {
       apiUrl = '$Api_Link/api/facilitators/getfacilitator';
     } else {
       apiUrl = '$Api_Link/api/users/getuser';
     }
     final userIdStr = await StorageService.getUserId();
     final userId = int.tryParse(userIdStr ?? '');
-    if (kDebugMode) {
-      print(userId);
-    }
     if (userId == null) {
-      if (kDebugMode) {
-        print("userId is not found");
+      setState(() => _loading = false);
+      return;
+    }
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'content-type': 'application/json'},
+        body: jsonEncode({'userId': userId}),
+      );
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        await StorageService.saveUsername(
+            '${data["firstname"]} ${data["lastname"]}');
+        setState(() {
+          email = data['email'] ?? '';
+          username = '${data["firstname"]} ${data["lastname"]}';
+          _loading = false;
+        });
       }
-    } else {
-      try {
-        final response = await http.post(Uri.parse(apiUrl),
-            headers: {'content-type': 'application/json'},
-            body: jsonEncode({'userId': userId}));
-
-        if (response.statusCode == 200) {
-          final Map<String, dynamic> data = jsonDecode(response.body);
-          if (kDebugMode) {
-            print("data is got successfully");
-          }
-          await StorageService.saveUsername(
-              data["firstname"] + " " + data["lastname"]);
-          setState(() {
-            email = data["email"];
-            username = data["firstname"] + " " + data["lastname"];
-          });
-        }
-      } catch (e) {
-        if (kDebugMode) {
-          print("error in getting user data: $e");
-        }
-      }
+    } catch (e) {
+      if (kDebugMode) print('error fetching user: $e');
+    } finally {
+      if (mounted) setState(() => _loading = false);
     }
   }
 
-  void showLogoutConfirmationDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          elevation: 5,
-          title: Text(
-            "Logout",
-            style: TextStyle(
-              color: thirdColor,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(
-            "Are you sure you want to logout?",
-            style: TextStyle(
-              color: thirdColor,
-              fontSize: 16,
-              fontWeight: FontWeight.normal,
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-              },
-              child: Text(
-                "Cancel",
-                style: TextStyle(
-                  color: thirdColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                logOut(context);
-              },
-              child: Text(
-                "Logout",
-                style: TextStyle(
-                  color: thirdColor,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+  String get _initials {
+    final parts = username.trim().split(' ').where((p) => p.isNotEmpty).toList();
+    if (parts.length >= 2) {
+      return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+    } else if (parts.isNotEmpty) {
+      return parts[0][0].toUpperCase();
+    }
+    return '?';
   }
 
-  void logOut(BuildContext context) async {
-    // Clear secure session data (JWT, user_id, user_type, username)
+  Future<void> _logOut() async {
     await StorageService.clearSession();
-    // Clear remaining SharedPreferences data (location cache, etc.)
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const LogInScreen()),
     );
   }
 
+  void _showLogoutDialog() {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Sign Out'),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx).pop();
+              _logOut();
+            },
+            style: TextButton.styleFrom(foregroundColor: AppTheme.primary),
+            child: const Text('Sign Out',
+                style: TextStyle(fontWeight: FontWeight.w700)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.surface,
       appBar: AppBar(
-        title: Text(
-          "Profile Settings",
-          style: TextStyle(
-            color: secondaryColor,
-            fontWeight: FontWeight.bold,
-            fontSize: 25,
+        title: const Text('Profile'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            tooltip: 'Edit Profile',
+            onPressed: () => Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (_) => const UpdateProfile()),
+            ),
           ),
-        ),
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
+          const SizedBox(width: 8),
+        ],
       ),
-      backgroundColor: Colors.white,
-      body: Container(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Stack(
-              children: [
-                SizedBox(
-                  width: 100,
-                  height: 100,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child: Image.asset(profile_image),
-                  ),
-                ),
-                Positioned(
-                  bottom: 0,
-                  right: 0,
-                  child: Container(
-                    width: 25,
-                    height: 25,
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  // ── Avatar banner ────────────────────────────────────────
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      color: secondaryColor,
+                      gradient: AppTheme.navyGradient,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                      boxShadow: AppTheme.cardShadow,
                     ),
-                    child: const Icon(
-                      LineAwesomeIcons.pen,
-                      color: Colors.white,
-                      size: 15.0,
-                    ),
-                  ),
-                )
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              username,
-              style:
-                  (const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            ),
-            Text(
-              email,
-              style:
-                  (const TextStyle(fontSize: 15, fontWeight: FontWeight.w400)),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              width: 200,
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(50),
-                  border: Border.all(width: 1.0, color: Colors.black),
-                  gradient: LinearGradient(
-                    colors: [mainColor, secondaryColor],
-                    begin: Alignment.centerRight,
-                    end: Alignment.centerLeft,
-                  ),
-                ),
-                child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pushReplacement(
-                        MaterialPageRoute(
-                          builder: (context) => const UpdateProfile(),
+                    child: Column(
+                      children: [
+                        // Avatar circle
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: AppTheme.brandGradient,
+                            boxShadow: AppTheme.elevatedShadow,
+                          ),
+                          child: Center(
+                            child: Text(
+                              _initials,
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
                         ),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      shadowColor: Colors.transparent,
-                      foregroundColor: Colors.white,
+                        const SizedBox(height: 14),
+                        Text(
+                          username.isEmpty ? 'Your Name' : username,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                            letterSpacing: -0.3,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          email.isEmpty ? 'your@email.com' : email,
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white.withOpacity(0.65),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Edit profile button
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                                builder: (_) => const UpdateProfile()),
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 24, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.15),
+                              borderRadius:
+                                  BorderRadius.circular(AppTheme.radiusXl),
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.3)),
+                            ),
+                            child: const Text(
+                              'Edit Profile',
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: const Text(
-                      'Edit Profile',
-                      style: TextStyle(fontSize: 20),
-                    )),
+                  ),
+
+                  // ── Menu section ────────────────────────────────────────
+                  _SectionHeader(label: 'Support'),
+                  _MenuTile(
+                    icon: Icons.help_outline_rounded,
+                    label: 'Help and Support',
+                    onTap: () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                          builder: (_) => const HelpSupportPage()),
+                    ),
+                  ),
+                  _MenuTile(
+                    icon: Icons.article_outlined,
+                    label: 'Terms and Conditions',
+                    onTap: () => Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(
+                          builder: (_) => const TermConditionPage()),
+                    ),
+                  ),
+
+                  _SectionHeader(label: 'Account'),
+                  _MenuTile(
+                    icon: Icons.logout_rounded,
+                    label: 'Sign Out',
+                    showChevron: false,
+                    iconColor: AppTheme.primary,
+                    labelColor: AppTheme.primary,
+                    onTap: _showLogoutDialog,
+                  ),
+
+                  const SizedBox(height: 32),
+                ],
               ),
             ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Divider(
-              color: Colors.white,
-            ),
-            // Menu
-            ProfileMenuWidget(
-              title: "Help and Support",
-              icon: LineAwesomeIcons.helping_hands,
-              onPress: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => const HelpSupportPage(),
-                  ),
-                );
-              },
-            ),
-            ProfileMenuWidget(
-              title: "Terms and Conditions",
-              icon: LineAwesomeIcons.alternate_shield,
-              onPress: () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => const TermConditionPage(),
-                  ),
-                );
-              },
-            ),
-            ProfileMenuWidget(
-              title: "Log Out",
-              icon: LineAwesomeIcons.door_open,
-              endIcon: false,
-              onPress: () {
-                showLogoutConfirmationDialog(context);
-              },
-            ),
-          ],
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label});
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 4),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w700,
+            color: AppTheme.textSecondary,
+            letterSpacing: 1.2,
+          ),
         ),
       ),
     );
   }
 }
 
+class _MenuTile extends StatelessWidget {
+  const _MenuTile({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.showChevron = true,
+    this.iconColor,
+    this.labelColor,
+  });
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool showChevron;
+  final Color? iconColor;
+  final Color? labelColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final iColor = iconColor ?? AppTheme.textPrimary;
+    final lColor = labelColor ?? AppTheme.textPrimary;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 3),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        boxShadow: AppTheme.cardShadow,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+          onTap: onTap,
+          child: Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: iColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: iColor, size: 20),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: lColor,
+                    ),
+                  ),
+                ),
+                if (showChevron)
+                  Icon(Icons.arrow_forward_ios_rounded,
+                      size: 14, color: AppTheme.textSecondary),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Compatibility shim kept for other screens that reference ProfileMenuWidget
 class ProfileMenuWidget extends StatelessWidget {
   const ProfileMenuWidget({
     super.key,
@@ -299,43 +369,12 @@ class ProfileMenuWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListTile(
+    return _MenuTile(
+      icon: icon,
+      label: title,
       onTap: onPress,
-      leading: Container(
-        width: 30,
-        height: 30,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(100),
-          color: secondaryColor.withOpacity(0.1),
-        ),
-        child: Icon(
-          icon,
-          color: secondaryColor,
-          size: 25,
-        ),
-      ),
-      title: Text(
-        title,
-        style: const TextStyle(
-          fontSize: 25,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-      trailing: endIcon
-          ? Container(
-              width: 25,
-              height: 25,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(100),
-                color: secondaryColor.withOpacity(0.1),
-              ),
-              child: Icon(
-                LineAwesomeIcons.angle_right,
-                color: secondaryColor,
-                size: 15.0,
-              ),
-            )
-          : null,
+      showChevron: endIcon,
+      labelColor: textColor,
     );
   }
 }

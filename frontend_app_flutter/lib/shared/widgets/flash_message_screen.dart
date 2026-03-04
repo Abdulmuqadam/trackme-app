@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 
 class FlashMessageScreen extends StatelessWidget {
   const FlashMessageScreen({super.key});
@@ -12,16 +12,14 @@ class FlashMessageScreen extends StatelessWidget {
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
-                content: CustomSnackBarWidget(
-                  errorText: 'Error',
-                ),
+                content: CustomSnackBarWidget(errorText: 'Error'),
                 behavior: SnackBarBehavior.floating,
                 backgroundColor: Colors.transparent,
-                elevation: 5,
+                elevation: 0,
               ),
             );
           },
-          child: const Text("show message"),
+          child: const Text('Show message'),
         ),
       ),
     );
@@ -29,88 +27,70 @@ class FlashMessageScreen extends StatelessWidget {
 }
 
 class CustomSnackBarWidget extends StatelessWidget {
-  const CustomSnackBarWidget({
-    super.key,
-    required this.errorText,
-  });
+  const CustomSnackBarWidget({super.key, required this.errorText});
 
   final String errorText;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(16.0),
-          height: 90,
-          decoration: const BoxDecoration(
-              color: Colors.red,
-              borderRadius: BorderRadius.all(
-                Radius.circular(20),
-              )),
-          child: Row(
-            children: [
-              const SizedBox(
-                width: 48,
-              ),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Oh Snap!",
-                      style: TextStyle(fontSize: 20, color: Colors.white),
-                    ),
-                    const SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      errorText,
-                      style: const TextStyle(fontSize: 18, color: Colors.white),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1A1D23),
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
-        ),
-        Positioned(
-          bottom: 0,
-          child: ClipRRect(
-            borderRadius: const BorderRadius.only(
-              bottomLeft: Radius.circular(20),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: AppTheme.primary.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: SvgPicture.asset(
-              "assets/images/svg/bubbles.svg",
-              height: 48,
-              width: 40,
-              color: Colors.redAccent,
+            child: Icon(
+              Icons.error_outline_rounded,
+              color: AppTheme.primary,
+              size: 20,
             ),
           ),
-        ),
-        Positioned(
-          top: -20,
-          left: 0,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SvgPicture.asset(
-                'assets/images/svg/fail.svg',
-                height: 20,
-              ),
-              Positioned(
-                top: 2,
-                child: SvgPicture.asset(
-                  'assets/images/svg/close.svg',
-                  height: 16,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Oops!',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    fontFamily: 'Poppins',
+                  ),
                 ),
-              ),
-            ],
+                Text(
+                  errorText,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFFADB5BD),
+                    fontFamily: 'Poppins',
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
           ),
-        )
-      ],
+        ],
+      ),
     );
   }
 }

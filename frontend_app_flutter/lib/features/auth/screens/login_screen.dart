@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/main.dart';
 import 'package:frontend_app_flutter/screens/facilitator_signup.dart';
 import 'package:frontend_app_flutter/screens/org_error_screen.dart';
 import 'package:frontend_app_flutter/screens/user_signup.dart';
-import 'package:toggle_switch/toggle_switch.dart';
 import 'package:frontend_app_flutter/misc/flash_message_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -17,51 +17,54 @@ class LogInScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.white,
+    return Scaffold(
+      backgroundColor: AppTheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: SizedBox(
-            width: double.infinity,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
-              child: Column(children: [
-                SizedBox(
-                  height: 20,
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const SizedBox(height: 48),
+              // Brand icon
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  gradient: AppTheme.brandGradient,
+                  borderRadius: BorderRadius.circular(22),
+                  boxShadow: AppTheme.elevatedShadow,
                 ),
-                LinearGradientMask(
-                  child: Icon(
-                    Icons.online_prediction_rounded,
-                    size: 100,
-                    color: Colors.white,
-                  ),
+                child: const Icon(
+                  Icons.location_on_rounded,
+                  color: Colors.white,
+                  size: 38,
                 ),
-                SizedBox(
-                  height: 10,
+              ),
+              const SizedBox(height: 20),
+              Text(
+                'Welcome Back',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w800,
+                  color: AppTheme.textPrimary,
+                  letterSpacing: -0.5,
                 ),
-                LinearGradientMask(
-                  child: Text(
-                    "Log in to your account",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 35,
-                        fontWeight: FontWeight.bold),
-                  ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Sign in to continue',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: AppTheme.textSecondary,
+                  fontWeight: FontWeight.w400,
                 ),
-                SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  "Sign in with your email and password \nor create new account if you are not a user,",
-                  style: TextStyle(fontSize: 18),
-                  textAlign: TextAlign.center,
-                ),
-                SizedBox(
-                  height: 15,
-                ),
-                LogInForm(),
-              ]),
-            ),
+              ),
+              const SizedBox(height: 32),
+              const LogInForm(),
+              const SizedBox(height: 24),
+            ],
           ),
         ),
       ),
@@ -77,14 +80,14 @@ class LogInForm extends StatefulWidget {
 }
 
 class _LogInFormState extends State<LogInForm> {
-  // Main APi Calling Functions
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
-  TextEditingController orgSubdomainController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController orgSubdomainController = TextEditingController();
 
-  /// Builds common headers including the organization subdomain when provided.
-  /// HTTP header names are case-insensitive (RFC 7230); the backend middleware
-  /// normalises via req.headers which are lowercased by Node/Express.
+  bool _obscureText = true;
+  int currentSwitchIndex = 0;
+  bool _isLoading = false;
+
   Map<String, String> _buildHeaders() {
     final headers = <String, String>{'Content-Type': 'application/json'};
     final subdomain = orgSubdomainController.text.trim();
@@ -95,9 +98,9 @@ class _LogInFormState extends State<LogInForm> {
   }
 
   Future<void> loginUser() async {
+    setState(() => _isLoading = true);
     try {
       const String apiUrl = '$Api_Link/api/users/login';
-
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: _buildHeaders(),
@@ -106,25 +109,22 @@ class _LogInFormState extends State<LogInForm> {
           'password': passwordController.text,
         }),
       );
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-        final String token = data['token'];
-        await StorageService.saveToken(token);
+        await StorageService.saveToken(data['token']);
         await StorageService.saveUserId(data["userId"].toString());
         await StorageService.saveUserType("user");
         final subdomain = orgSubdomainController.text.trim();
         if (subdomain.isNotEmpty) {
           await StorageService.saveOrgSubdomain(subdomain);
         }
-        if (kDebugMode) {
-          print(data["userId"]);
-        }
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainPage()),
         );
       } else if (response.statusCode == 404) {
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -133,6 +133,7 @@ class _LogInFormState extends State<LogInForm> {
           ),
         );
       } else if (response.statusCode == 403) {
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -141,6 +142,7 @@ class _LogInFormState extends State<LogInForm> {
           ),
         );
       } else {
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: CustomSnackBarWidget(errorText: "Invalid Credentials"),
@@ -151,16 +153,16 @@ class _LogInFormState extends State<LogInForm> {
         );
       }
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      if (kDebugMode) print(e);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   Future<void> loginFacilitator() async {
+    setState(() => _isLoading = true);
     try {
       const String apiUrl = '$Api_Link/api/facilitators/login';
-
       final response = await http.post(
         Uri.parse(apiUrl),
         headers: _buildHeaders(),
@@ -169,25 +171,22 @@ class _LogInFormState extends State<LogInForm> {
           'password': passwordController.text,
         }),
       );
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
-        final String token = data['token'];
-        await StorageService.saveToken(token);
+        await StorageService.saveToken(data['token']);
         await StorageService.saveUserId(data["userId"].toString());
         await StorageService.saveUserType("facilitator");
         final subdomain = orgSubdomainController.text.trim();
         if (subdomain.isNotEmpty) {
           await StorageService.saveOrgSubdomain(subdomain);
         }
-        if (kDebugMode) {
-          print(data["userId"]);
-        }
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const MainPage()),
         );
       } else if (response.statusCode == 404) {
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -196,6 +195,7 @@ class _LogInFormState extends State<LogInForm> {
           ),
         );
       } else if (response.statusCode == 403) {
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -204,9 +204,7 @@ class _LogInFormState extends State<LogInForm> {
           ),
         );
       } else {
-        if (kDebugMode) {
-          print("");
-        }
+        if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: CustomSnackBarWidget(errorText: "Invalid Credentials"),
@@ -217,233 +215,242 @@ class _LogInFormState extends State<LogInForm> {
         );
       }
     } catch (e) {
-      if (kDebugMode) {
-        print(e);
-      }
+      if (kDebugMode) print(e);
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
-  // Usefully Variables
-  bool _obscureText = true;
-  int currentSwitchIndex = 0;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // Role selector
+        Container(
+          height: 50,
+          decoration: BoxDecoration(
+            color: const Color(0xFFEEF0F5),
+            borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+          ),
+          child: Row(
+            children: [
+              _RoleTab(
+                label: 'User',
+                icon: Icons.person_rounded,
+                isSelected: currentSwitchIndex == 0,
+                onTap: () => setState(() => currentSwitchIndex = 0),
+              ),
+              _RoleTab(
+                label: 'Facilitator',
+                icon: Icons.shield_rounded,
+                isSelected: currentSwitchIndex == 1,
+                onTap: () => setState(() => currentSwitchIndex = 1),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Organization subdomain
+        TextFormField(
+          controller: orgSubdomainController,
+          keyboardType: TextInputType.text,
+          decoration: const InputDecoration(
+            labelText: 'Organization (optional)',
+            hintText: 'e.g. nypd',
+            prefixIcon: Icon(Icons.business_rounded),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Email
+        TextFormField(
+          controller: emailController,
+          keyboardType: TextInputType.emailAddress,
+          decoration: const InputDecoration(
+            labelText: 'Email address',
+            hintText: 'you@example.com',
+            prefixIcon: Icon(Icons.email_outlined),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // Password
+        TextFormField(
+          controller: passwordController,
+          obscureText: _obscureText,
+          decoration: InputDecoration(
+            labelText: 'Password',
+            hintText: '••••••••',
+            prefixIcon: const Icon(Icons.lock_outline_rounded),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureText
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+              ),
+              onPressed: () => setState(() => _obscureText = !_obscureText),
+            ),
+          ),
+        ),
+        const SizedBox(height: 28),
+
+        // Login button
+        _GradientButton(
+          onPressed: _isLoading
+              ? null
+              : () {
+                  if (currentSwitchIndex == 0) {
+                    loginUser();
+                  } else {
+                    loginFacilitator();
+                  }
+                },
+          isLoading: _isLoading,
+          label: 'Sign In',
+        ),
+        const SizedBox(height: 24),
+
+        // Sign-up link
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Don't have an account? ",
+              style: TextStyle(
+                fontSize: 14,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            GestureDetector(
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => currentSwitchIndex == 0
+                        ? const UserSignupScreen()
+                        : const FacilitatorSignupScreen(),
+                  ),
+                );
+              },
+              child: Text(
+                'Create account',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppTheme.primary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _RoleTab extends StatelessWidget {
+  const _RoleTab({
+    required this.label,
+    required this.icon,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final bool isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-        child: Column(
-      children: [
-        // Toggle Switch
-        ToggleSwitch(
-          minWidth: 200.0,
-          cornerRadius: 20.0,
-          fontSize: 18,
-          borderColor: const [Colors.black],
-          borderWidth: 1.0,
-          activeBgColors: [
-            [secondaryColor],
-            [secondaryColor]
-          ],
-          activeFgColor: Colors.white,
-          inactiveBgColor: Colors.amberAccent,
-          inactiveFgColor: Colors.white,
-          initialLabelIndex: 0,
-          totalSwitches: 2,
-          labels: const ['User', 'Facilitator'],
-          radiusStyle: true,
-          onToggle: (index) {
-            currentSwitchIndex = index!;
-          },
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-
-        // Organization subdomain field (optional – leave blank for standalone use)
-        TextFormField(
-          controller: orgSubdomainController,
-          decoration: InputDecoration(
-              labelText: "Organization (optional)",
-              hintText: "e.g. nypd",
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-              floatingLabelStyle: TextStyle(
-                color: secondaryColor,
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: isSelected ? Colors.white : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+            boxShadow: isSelected ? AppTheme.cardShadow : [],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: isSelected ? AppTheme.primary : AppTheme.textSecondary,
               ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 40,
-                vertical: 20,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(28),
-                borderSide: const BorderSide(color: Colors.black),
-                gapPadding: 10,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(28),
-                borderSide: BorderSide(color: secondaryColor),
-                gapPadding: 10,
-              ),
-              suffixIcon: const Padding(
-                padding: EdgeInsets.fromLTRB(0, 20, 20, 20),
-                child: Icon(Icons.business_rounded),
-              )),
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-
-        // Email field
-        TextFormField(
-          controller: emailController,
-          decoration: InputDecoration(
-              labelText: "Email",
-              hintText: "Enter the Email",
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-              floatingLabelStyle: TextStyle(
-                color: secondaryColor,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 40,
-                vertical: 20,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(28),
-                borderSide: const BorderSide(color: Colors.black),
-                gapPadding: 10,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(28),
-                borderSide:
-                    BorderSide(color: secondaryColor),
-                gapPadding: 10,
-              ),
-              suffixIcon: const Padding(
-                padding: EdgeInsets.fromLTRB(0, 20, 20, 20),
-                child: Icon(
-                  Icons.email_rounded,
-                ),
-              )),
-        ),
-        const SizedBox(
-          height: 20,
-        ),
-
-        // password field
-        TextFormField(
-          obscureText: _obscureText,
-          controller: passwordController,
-          decoration: InputDecoration(
-              labelText: "Password",
-              hintText: "Enter the password",
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-              floatingLabelStyle: TextStyle(
-                color: secondaryColor,
-              ),
-              contentPadding: const EdgeInsets.symmetric(
-                horizontal: 40,
-                vertical: 20,
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(28),
-                borderSide: const BorderSide(color: Colors.black),
-                gapPadding: 10,
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(28),
-                borderSide:
-                    BorderSide(color: secondaryColor),
-                gapPadding: 10,
-              ),
-              suffixIcon: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
-                child: IconButton(
-                  icon: Icon(
-                    _obscureText ? Icons.visibility : Icons.visibility_off,
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _obscureText = !_obscureText;
-                    });
-                  },
-                ),
-              )),
-        ),
-        //   login button
-        const SizedBox(
-          height: 20,
-        ),
-
-        // Login Button
-        SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: Container(
-            height: 50,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(50),
-              border: Border.all(width: 1.0, color: Colors.black),
-              gradient: LinearGradient(
-                colors: [mainColor, secondaryColor],
-                begin: Alignment.centerRight,
-                end: Alignment.centerLeft,
-              ),
-            ),
-            child: ElevatedButton(
-              onPressed: () {
-                if (currentSwitchIndex == 0) {
-                  if (kDebugMode) {
-                    print("user");
-                  }
-                  loginUser();
-                } else {
-                  loginFacilitator();
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                elevation: 4,
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-              ),
-              child: const Text(
-                "Login",
+              const SizedBox(width: 6),
+              Text(
+                label,
                 style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                  fontSize: 14,
+                  fontWeight:
+                      isSelected ? FontWeight.w700 : FontWeight.w500,
+                  color:
+                      isSelected ? AppTheme.primary : AppTheme.textSecondary,
+                ),
               ),
-            ),
+            ],
           ),
         ),
-        const SizedBox(height: 20.0),
-        const Text(
-          "If you don't have an account",
-          style: TextStyle(fontSize: 18),
+      ),
+    );
+  }
+}
+
+class _GradientButton extends StatelessWidget {
+  const _GradientButton({
+    required this.label,
+    required this.onPressed,
+    this.isLoading = false,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        height: 54,
+        decoration: BoxDecoration(
+          gradient: onPressed != null
+              ? AppTheme.brandGradient
+              : const LinearGradient(
+                  colors: [Color(0xFFCCCCCC), Color(0xFFBBBBBB)]),
+          borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+          boxShadow: onPressed != null ? AppTheme.elevatedShadow : [],
         ),
-        GestureDetector(
-          onTap: () {
-            if (currentSwitchIndex == 0) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const UserSignupScreen()),
-              );
-            } else {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const FacilitatorSignupScreen()),
-              );
-            }
-          },
-          child: const Text(
-            "Create a new account",
-            style: TextStyle(
-              fontSize: 18,
-              color: Colors.blue,
-            ),
-          ),
+        child: Center(
+          child: isLoading
+              ? const SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2.5,
+                  ),
+                )
+              : Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
+                    letterSpacing: 0.3,
+                  ),
+                ),
         ),
-      ],
-    ));
+      ),
+    );
   }
 }
 
@@ -454,14 +461,7 @@ class LinearGradientMask extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ShaderMask(
-      shaderCallback: (bounds) {
-        return LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.topRight,
-          colors: [mainColor, secondaryColor],
-          tileMode: TileMode.mirror,
-        ).createShader(bounds);
-      },
+      shaderCallback: (bounds) => AppTheme.brandGradient.createShader(bounds),
       child: child,
     );
   }

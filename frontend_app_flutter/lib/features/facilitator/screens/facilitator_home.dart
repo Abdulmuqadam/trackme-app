@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -125,41 +126,21 @@ class _FacilitatorHomeContentState extends State<FacilitatorHomeContent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.surface,
       appBar: AppBar(
-        title: Text(
-          'Your Operations',
-          style: TextStyle(
-            color: secondaryColor,
-            fontSize: 35,
-            fontWeight: FontWeight.bold,
-            fontFamily: "Poppins",
+        title: const Text('Operations'),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh',
+            onPressed: _refreshData,
+            icon: const Icon(Icons.refresh_rounded),
           ),
-        ),
-        backgroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.black), // Icon color
-      ),
-      body: isLoading
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : FacilitatorCardView(queryData: queryData),
-      floatingActionButton: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 25.0),
-            child: FloatingActionButton(
-              onPressed: _refreshData,
-              tooltip: 'Refresh',
-              splashColor: mainColor,
-              foregroundColor: Colors.white,
-              backgroundColor: secondaryColor,
-              child: const Icon(Icons.refresh),
-            ),
-          ),
+          const SizedBox(width: 8),
         ],
       ),
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : FacilitatorCardView(queryData: queryData),
     );
   }
 }
@@ -170,26 +151,45 @@ class FacilitatorCardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: ListView.builder(
-        itemCount: queryData.length,
-        itemBuilder: (context, index) {
-          final query = queryData[index];
-          return FacilitatorCards(
-            id: query.id,
-            colors: query.colors,
-            name: query.name,
-            image: query.image,
-            postedBy: query.postedBy,
-            message: query.message,
-            location: query.location,
-            completed: query.completed,
-            audioData: query.audioData,
-            onPressed: () {},
-          );
-        },
-      ),
+    if (queryData.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.inbox_rounded,
+                size: 56, color: AppTheme.textSecondary.withOpacity(0.4)),
+            const SizedBox(height: 12),
+            Text(
+              'No operations assigned',
+              style: TextStyle(
+                fontSize: 15,
+                color: AppTheme.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return ListView.builder(
+      physics: const BouncingScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      itemCount: queryData.length,
+      itemBuilder: (context, index) {
+        final query = queryData[index];
+        return FacilitatorCards(
+          id: query.id,
+          colors: query.colors,
+          name: query.name,
+          image: query.image,
+          postedBy: query.postedBy,
+          message: query.message,
+          location: query.location,
+          completed: query.completed,
+          audioData: query.audioData,
+          onPressed: () {},
+        );
+      },
     );
   }
 }
@@ -296,79 +296,107 @@ class _FacilitatorCardsState extends State<FacilitatorCards> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        _showInfoDialog(context);
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Card(
-          color: widget.colors.first,
-          elevation: 10,
-          shadowColor: Colors.black,
-          child: SizedBox(
-            height: 145,
-            child: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(10.0),
+      onTap: () => _showInfoDialog(context),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+          boxShadow: AppTheme.cardShadow,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Top colored banner
+            Container(
+              height: 6,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: widget.colors,
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(AppTheme.radiusLg),
+                  topRight: Radius.circular(AppTheme.radiusLg),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: Row(
+                children: [
+                  // Thumbnail
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     child: SizedBox(
-                      height: 120,
-                      width: 120,
-                      child: Image.asset(
-                        widget.image,
-                        fit: BoxFit.cover,
-                      ),
+                      width: 68,
+                      height: 68,
+                      child: Image.asset(widget.image, fit: BoxFit.cover),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(top: 40.0, bottom: 5),
-                        child: Text(
+                  const SizedBox(width: 14),
+                  // Info
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
                           widget.name,
-                          style: const TextStyle(
-                            fontSize: 25,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.textPrimary,
+                            letterSpacing: -0.2,
                           ),
-                          textAlign: TextAlign.center,
                         ),
-                      ),
-                      const Divider(),
-                      Row(
-                        children: [
-                          Text(
-                            "Query By: ${widget.postedBy}",
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            Icon(Icons.person_outline_rounded,
+                                size: 13, color: AppTheme.textSecondary),
+                            const SizedBox(width: 4),
+                            Text(
+                              widget.postedBy,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppTheme.textSecondary,
+                              ),
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const Spacer(),
-                          Switch(
-                            value: _isComplete,
-                            onChanged: (value) {
-                              setState(() {
-                                _isComplete = value;
-                                updateQueryCompletionStatus(
-                                    widget.id, _isComplete);
-                              });
-                            },
-                          ),
-                        ],
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Completion switch
+                  Column(
+                    children: [
+                      Switch(
+                        value: _isComplete,
+                        activeColor: const Color(0xFF22C55E),
+                        onChanged: (value) {
+                          setState(() {
+                            _isComplete = value;
+                            updateQueryCompletionStatus(widget.id, _isComplete);
+                          });
+                        },
+                      ),
+                      Text(
+                        _isComplete ? 'Done' : 'Open',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: _isComplete
+                              ? const Color(0xFF22C55E)
+                              : AppTheme.primary,
+                        ),
                       ),
                     ],
                   ),
-                )
-              ],
+                ],
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -377,93 +405,60 @@ class _FacilitatorCardsState extends State<FacilitatorCards> {
   void _showInfoDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext ctx) {
         return AlertDialog(
-          title: Text(
-            'Additional Information',
-            style: TextStyle(
-              color: thirdColor,
-            ),
-          ),
+          title: Text(widget.name),
           content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text(
-                  'Message: ${widget.message}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: thirdColor,
-                  ),
-                ),
-                Text(
-                  'Posted By: ${widget.postedBy}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: thirdColor,
-                  ),
-                ),
-                Text(
-                  'Location: ${widget.location}',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: thirdColor,
-                  ),
-                ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _InfoRow(
+                    icon: Icons.message_outlined, label: widget.message),
+                const SizedBox(height: 8),
+                _InfoRow(
+                    icon: Icons.person_outline_rounded,
+                    label: 'By: ${widget.postedBy}'),
+                const SizedBox(height: 8),
+                _InfoRow(
+                    icon: Icons.location_on_outlined,
+                    label: widget.location),
+                const SizedBox(height: 12),
                 Row(
                   children: [
-                    Text(
-                      "Audio:",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: thirdColor,
-                      ),
-                    ),
+                    Text('Audio: ',
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppTheme.textPrimary)),
                     IconButton(
-                      icon: const Icon(
-                        Icons.play_arrow_rounded,
-                      ),
+                      icon: Icon(Icons.play_circle_fill_rounded,
+                          color: AppTheme.primary, size: 30),
                       onPressed: () async {
-                        await downloadAudio(
-                            "$Api_Link/${widget.audioData}");
+                        await downloadAudio('$Api_Link/${widget.audioData}');
                         await playAudio();
                       },
                     ),
                     IconButton(
-                      onPressed: () {
-                        stopAudio();
-                      },
-                      icon: const Icon(Icons.pause_rounded),
+                      icon: Icon(Icons.stop_circle_rounded,
+                          color: AppTheme.textSecondary, size: 30),
+                      onPressed: stopAudio,
                     ),
                   ],
                 ),
               ],
             ),
           ),
-          actions: <Widget>[
+          actions: [
             TextButton(
-              child: Text(
-                'Close',
-                style: TextStyle(
-                  color: thirdColor,
-                  fontSize: 16,
-                ),
-              ),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Close'),
             ),
             TextButton(
-              child: Text(
-                'Ok',
-                style: TextStyle(
-                  color: thirdColor,
-                  fontSize: 16,
-                ),
-              ),
               onPressed: () {
                 _saveLocation();
-                Navigator.of(context).pop();
+                Navigator.of(ctx).pop();
               },
+              child: const Text('OK'),
             ),
           ],
         );
@@ -525,4 +520,31 @@ class Queries {
 
   Queries(this.id, this.colors, this.image, this.name, this.postedBy,
       this.message, this.location, this.completed, this.audioData);
+}
+
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.icon, required this.label});
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 16, color: AppTheme.textSecondary),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: AppTheme.textPrimary,
+              height: 1.4,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }

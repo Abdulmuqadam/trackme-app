@@ -209,44 +209,81 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [mainColor, secondaryColor],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0E3460), Color(0xFF08203E)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
+        ),
+        child: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Center(
-                child: Image.asset(
-                  'assets/icons/icon.png',
-                  width: 300,
-                  height: 100,
+              const Spacer(flex: 2),
+              // Logo / icon
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFD700), Color(0xFFED2939)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFED2939).withOpacity(0.35),
+                      blurRadius: 30,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.location_on_rounded,
+                  color: Colors.white,
+                  size: 52,
                 ),
               ),
-              // LinearGradientMask(
-              //   child: Icon(
-              //     Icons.online_prediction,
-              //     size: 175,
-              //     color: Colors.white,
-              //   ),
-              // ),
-              const SizedBox(height: 10),
-              const LinearGradientMask(
-                  child: Text(
-                "Track Me",
+              const SizedBox(height: 28),
+              const Text(
+                'TrackMe',
                 style: TextStyle(
-                  fontFamily: "Poppins",
-                  fontStyle: FontStyle.italic,
+                  fontFamily: 'Poppins',
+                  fontSize: 38,
+                  fontWeight: FontWeight.w800,
                   color: Colors.white,
-                  fontSize: 40,
+                  letterSpacing: 1.5,
                 ),
-              )),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Your safety, always connected',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white.withOpacity(0.6),
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const Spacer(flex: 2),
+              // Loading indicator at bottom
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    const Color(0xFFFFD700).withOpacity(0.8),
+                  ),
+                  strokeWidth: 2.5,
+                ),
+              ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
