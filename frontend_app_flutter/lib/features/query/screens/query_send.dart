@@ -6,9 +6,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
+import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/screens/user_home.dart';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,7 +25,6 @@ class QuerySendPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        elevation: 10,
         leading: IconButton(
           onPressed: () {
             Navigator.pushReplacement(
@@ -33,18 +32,9 @@ class QuerySendPage extends StatelessWidget {
               MaterialPageRoute(builder: (context) => const HomeScreen()),
             );
           },
-          icon: const Icon(LineAwesomeIcons.angle_left),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        title: Text(
-          user.name,
-          style: TextStyle(
-            color: secondaryColor,
-            fontSize: 25,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: Text(user.name),
         centerTitle: true,
       ),
       body: SingleChildScrollView(

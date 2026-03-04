@@ -3,10 +3,10 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:frontend_app_flutter/features/user/screens/profile_screen.dart';
-import 'package:line_awesome_flutter/line_awesome_flutter.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:frontend_app_flutter/core/storage/storage_service.dart';
@@ -40,69 +40,71 @@ class _UpdateProfileState extends State<UpdateProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
         leading: IconButton(
-          onPressed: () {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const ProfileScreen()),
-            );
-          },
-          icon: const Icon(LineAwesomeIcons.angle_left),
+          onPressed: () => Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (_) => const ProfileScreen()),
+          ),
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
         ),
-        title: const Text(
-          "Edit Profile",
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Edit Profile'),
       ),
-      backgroundColor: Colors.white,
       body: SingleChildScrollView(
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              Stack(
+        physics: const BouncingScrollPhysics(),
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          children: [
+            // Avatar
+            Center(
+              child: Stack(
                 children: [
-                  SizedBox(
-                    width: 150,
-                    height: 150,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(100),
-                      child: _image == null
-                          ? Image.network(Profile_Image)
-                          : Image.file(_image!),
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: AppTheme.brandGradient,
+                      boxShadow: AppTheme.elevatedShadow,
                     ),
+                    child: _image == null
+                        ? const Icon(
+                            Icons.person_rounded,
+                            color: Colors.white,
+                            size: 48,
+                          )
+                        : ClipOval(
+                            child: Image.file(_image!, fit: BoxFit.cover)),
                   ),
                   Positioned(
                     bottom: 0,
                     right: 0,
-                    child: Container(
-                        width: 40,
-                        height: 40,
+                    child: GestureDetector(
+                      onTap: getImage,
+                      child: Container(
+                        width: 32,
+                        height: 32,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(100),
-                          color: secondaryColor,
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                          border: Border.all(
+                              color: AppTheme.border, width: 1.5),
+                          boxShadow: AppTheme.cardShadow,
                         ),
-                        child: IconButton(
-                          onPressed: () {
-                            getImage();
-                          },
-                          icon: const Icon(
-                            LineAwesomeIcons.camera,
-                            color: Colors.white,
-                            size: 25.0,
-                          ),
-                        )),
-                  )
+                        child: Icon(
+                          Icons.camera_alt_rounded,
+                          color: AppTheme.primary,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(
-                height: 20,
-              ),
-              const UpdateUserForm()
-            ],
-          ),
+            ),
+            const SizedBox(height: 28),
+            const UpdateUserForm(),
+          ],
         ),
       ),
     );

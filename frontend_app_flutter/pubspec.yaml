@@ -21,8 +21,6 @@ dependencies:
   get: ^4.7.2
 
   # UI & Navigation
-  toggle_switch: ^2.3.0
-  line_awesome_flutter: ^2.0.0
   flutter_svg: ^2.0.17
   awesome_snackbar_content: ^0.1.3
 
