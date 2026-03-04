@@ -8,26 +8,12 @@ import 'package:frontend_app_flutter/screens/org_error_screen.dart';
 import 'package:frontend_app_flutter/screens/user_signup.dart';
 import 'package:toggle_switch/toggle_switch.dart';
 import 'package:frontend_app_flutter/misc/flash_message_screen.dart';
-import 'package:frontend_app_flutter/misc/user_bloc.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:frontend_app_flutter/core/storage/storage_service.dart';
 
 class LogInScreen extends StatelessWidget {
   const LogInScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => UserBloc(),
-      child: const LogInScreenContent(),
-    );
-  }
-}
-
-class LogInScreenContent extends StatelessWidget {
-  const LogInScreenContent({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -243,223 +229,221 @@ class _LogInFormState extends State<LogInForm> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<UserBloc, UserType>(builder: (context, userType) {
-      return Form(
-          child: Column(
-        children: [
-          // Toggle Switch
-          ToggleSwitch(
-            minWidth: 200.0,
-            cornerRadius: 20.0,
-            fontSize: 18,
-            borderColor: const [Colors.black],
-            borderWidth: 1.0,
-            activeBgColors: [
-              [secondaryColor],
-              [secondaryColor]
-            ],
-            activeFgColor: Colors.white,
-            inactiveBgColor: Colors.amberAccent,
-            inactiveFgColor: Colors.white,
-            initialLabelIndex: 0,
-            totalSwitches: 2,
-            labels: const ['User', 'Facilitator'],
-            radiusStyle: true,
-            onToggle: (index) {
-              currentSwitchIndex = index!;
-            },
-          ),
-          const SizedBox(
-            height: 20,
-          ),
+    return Form(
+        child: Column(
+      children: [
+        // Toggle Switch
+        ToggleSwitch(
+          minWidth: 200.0,
+          cornerRadius: 20.0,
+          fontSize: 18,
+          borderColor: const [Colors.black],
+          borderWidth: 1.0,
+          activeBgColors: [
+            [secondaryColor],
+            [secondaryColor]
+          ],
+          activeFgColor: Colors.white,
+          inactiveBgColor: Colors.amberAccent,
+          inactiveFgColor: Colors.white,
+          initialLabelIndex: 0,
+          totalSwitches: 2,
+          labels: const ['User', 'Facilitator'],
+          radiusStyle: true,
+          onToggle: (index) {
+            currentSwitchIndex = index!;
+          },
+        ),
+        const SizedBox(
+          height: 20,
+        ),
 
-          // Organization subdomain field (optional – leave blank for standalone use)
-          TextFormField(
-            controller: orgSubdomainController,
-            decoration: InputDecoration(
-                labelText: "Organization (optional)",
-                hintText: "e.g. nypd",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                floatingLabelStyle: TextStyle(
-                  color: secondaryColor,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 20,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(28),
-                  borderSide: const BorderSide(color: Colors.black),
-                  gapPadding: 10,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(28),
-                  borderSide: BorderSide(color: secondaryColor),
-                  gapPadding: 10,
-                ),
-                suffixIcon: const Padding(
-                  padding: EdgeInsets.fromLTRB(0, 20, 20, 20),
-                  child: Icon(Icons.business_rounded),
-                )),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
+        // Organization subdomain field (optional – leave blank for standalone use)
+        TextFormField(
+          controller: orgSubdomainController,
+          decoration: InputDecoration(
+              labelText: "Organization (optional)",
+              hintText: "e.g. nypd",
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              floatingLabelStyle: TextStyle(
+                color: secondaryColor,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 40,
+                vertical: 20,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(28),
+                borderSide: const BorderSide(color: Colors.black),
+                gapPadding: 10,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(28),
+                borderSide: BorderSide(color: secondaryColor),
+                gapPadding: 10,
+              ),
+              suffixIcon: const Padding(
+                padding: EdgeInsets.fromLTRB(0, 20, 20, 20),
+                child: Icon(Icons.business_rounded),
+              )),
+        ),
+        const SizedBox(
+          height: 20,
+        ),
 
-          // Email field
-          TextFormField(
-            controller: emailController,
-            decoration: InputDecoration(
-                labelText: "Email",
-                hintText: "Enter the Email",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                floatingLabelStyle: TextStyle(
-                  color: secondaryColor,
+        // Email field
+        TextFormField(
+          controller: emailController,
+          decoration: InputDecoration(
+              labelText: "Email",
+              hintText: "Enter the Email",
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              floatingLabelStyle: TextStyle(
+                color: secondaryColor,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 40,
+                vertical: 20,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(28),
+                borderSide: const BorderSide(color: Colors.black),
+                gapPadding: 10,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(28),
+                borderSide:
+                    BorderSide(color: secondaryColor),
+                gapPadding: 10,
+              ),
+              suffixIcon: const Padding(
+                padding: EdgeInsets.fromLTRB(0, 20, 20, 20),
+                child: Icon(
+                  Icons.email_rounded,
                 ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 20,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(28),
-                  borderSide: const BorderSide(color: Colors.black),
-                  gapPadding: 10,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(28),
-                  borderSide:
-                      BorderSide(color: secondaryColor),
-                  gapPadding: 10,
-                ),
-                suffixIcon: const Padding(
-                  padding: EdgeInsets.fromLTRB(0, 20, 20, 20),
-                  child: Icon(
-                    Icons.email_rounded,
+              )),
+        ),
+        const SizedBox(
+          height: 20,
+        ),
+
+        // password field
+        TextFormField(
+          obscureText: _obscureText,
+          controller: passwordController,
+          decoration: InputDecoration(
+              labelText: "Password",
+              hintText: "Enter the password",
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              floatingLabelStyle: TextStyle(
+                color: secondaryColor,
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 40,
+                vertical: 20,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(28),
+                borderSide: const BorderSide(color: Colors.black),
+                gapPadding: 10,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(28),
+                borderSide:
+                    BorderSide(color: secondaryColor),
+                gapPadding: 10,
+              ),
+              suffixIcon: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
+                child: IconButton(
+                  icon: Icon(
+                    _obscureText ? Icons.visibility : Icons.visibility_off,
                   ),
-                )),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
+                  onPressed: () {
+                    setState(() {
+                      _obscureText = !_obscureText;
+                    });
+                  },
+                ),
+              )),
+        ),
+        //   login button
+        const SizedBox(
+          height: 20,
+        ),
 
-          // password field
-          TextFormField(
-            obscureText: _obscureText,
-            controller: passwordController,
-            decoration: InputDecoration(
-                labelText: "Password",
-                hintText: "Enter the password",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                floatingLabelStyle: TextStyle(
-                  color: secondaryColor,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 40,
-                  vertical: 20,
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(28),
-                  borderSide: const BorderSide(color: Colors.black),
-                  gapPadding: 10,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(28),
-                  borderSide:
-                      BorderSide(color: secondaryColor),
-                  gapPadding: 10,
-                ),
-                suffixIcon: Padding(
-                  padding: const EdgeInsets.fromLTRB(0, 10, 10, 10),
-                  child: IconButton(
-                    icon: Icon(
-                      _obscureText ? Icons.visibility : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureText = !_obscureText;
-                      });
-                    },
-                  ),
-                )),
-          ),
-          //   login button
-          const SizedBox(
-            height: 20,
-          ),
-
-          // Login Button
-          SizedBox(
-            width: double.infinity,
+        // Login Button
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: Container(
             height: 50,
-            child: Container(
-              height: 50,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(50),
-                border: Border.all(width: 1.0, color: Colors.black),
-                gradient: LinearGradient(
-                  colors: [mainColor, secondaryColor],
-                  begin: Alignment.centerRight,
-                  end: Alignment.centerLeft,
-                ),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(50),
+              border: Border.all(width: 1.0, color: Colors.black),
+              gradient: LinearGradient(
+                colors: [mainColor, secondaryColor],
+                begin: Alignment.centerRight,
+                end: Alignment.centerLeft,
               ),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (currentSwitchIndex == 0) {
-                    if (kDebugMode) {
-                      print("user");
-                    }
-                    loginUser();
-                  } else {
-                    loginFacilitator();
+            ),
+            child: ElevatedButton(
+              onPressed: () {
+                if (currentSwitchIndex == 0) {
+                  if (kDebugMode) {
+                    print("user");
                   }
-                },
-                style: ElevatedButton.styleFrom(
-                  elevation: 4,
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                ),
-                child: const Text(
-                  "Login",
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
+                  loginUser();
+                } else {
+                  loginFacilitator();
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                elevation: 4,
+                backgroundColor: Colors.transparent,
+                shadowColor: Colors.transparent,
+              ),
+              child: const Text(
+                "Login",
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
           ),
-          const SizedBox(height: 20.0),
-          const Text(
-            "If you don't have an account",
-            style: TextStyle(fontSize: 18),
-          ),
-          GestureDetector(
-            onTap: () {
-              if (currentSwitchIndex == 0) {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const UserSignupScreen()),
-                );
-              } else {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const FacilitatorSignupScreen()),
-                );
-              }
-            },
-            child: const Text(
-              "Create a new account",
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.blue,
-              ),
+        ),
+        const SizedBox(height: 20.0),
+        const Text(
+          "If you don't have an account",
+          style: TextStyle(fontSize: 18),
+        ),
+        GestureDetector(
+          onTap: () {
+            if (currentSwitchIndex == 0) {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const UserSignupScreen()),
+              );
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => const FacilitatorSignupScreen()),
+              );
+            }
+          },
+          child: const Text(
+            "Create a new account",
+            style: TextStyle(
+              fontSize: 18,
+              color: Colors.blue,
             ),
           ),
-        ],
-      ));
-    });
+        ),
+      ],
+    ));
   }
 }
 
