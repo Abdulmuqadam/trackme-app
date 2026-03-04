@@ -7,9 +7,9 @@ import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/screens/location_fetcher.dart';
 import 'package:http/http.dart' as http;
 import 'package:frontend_app_flutter/screens/login_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:connectivity/connectivity.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
+import '../core/storage/storage_service.dart';
 import '../misc/flash_message_screen.dart';
 import '../misc/user_service.dart';
 
@@ -27,7 +27,9 @@ class _SplashScreenState extends State<SplashScreen>
   final LocationFetcher _locationFetcher = LocationFetcher();
 
   Future<void> checkConnectivity() async {
-    var connectivityResult = await Connectivity().checkConnectivity();
+    final results = await Connectivity().checkConnectivity();
+    final connectivityResult =
+        results.isNotEmpty ? results.first : ConnectivityResult.none;
     setState(() {
       _connectivityResult = connectivityResult;
     });
@@ -46,8 +48,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<dynamic> sendUserJwtTokenAndSaveResponse() async {
     const apiUrl = '$Api_Link/api/users/verify';
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final jwtToken = prefs.getString('jwt_token');
+      final jwtToken = await StorageService.getToken();
       if (jwtToken == null) {
         Future.delayed(
           const Duration(seconds: 5),
@@ -71,7 +72,7 @@ class _SplashScreenState extends State<SplashScreen>
         if (response.statusCode == 200) {
           final userId = (data["userId"] as num?)?.toInt();
           if (userId != null) {
-            prefs.setInt("user_id", userId);
+            await StorageService.saveUserId(userId.toString());
           }
           Future.delayed(
             const Duration(seconds: 5),
@@ -110,8 +111,7 @@ class _SplashScreenState extends State<SplashScreen>
   Future<dynamic> sendFacilitatorJwtTokenAndSaveResponse() async {
     const apiUrl = '$Api_Link/api/facilitators/verify';
     try {
-      final SharedPreferences prefs = await SharedPreferences.getInstance();
-      final jwtToken = prefs.getString('jwt_token');
+      final jwtToken = await StorageService.getToken();
       if (jwtToken == null) {
         Future.delayed(
           const Duration(seconds: 5),
@@ -135,7 +135,7 @@ class _SplashScreenState extends State<SplashScreen>
         if (response.statusCode == 200) {
           final userId = (data["userId"] as num?)?.toInt();
           if (userId != null) {
-            prefs.setInt("user_id", userId);
+            await StorageService.saveUserId(userId.toString());
           }
           Future.delayed(
             const Duration(seconds: 5),
@@ -172,8 +172,7 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<String?> choseUser() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final userType = prefs.getString("user_type");
+    final userType = await StorageService.getUserType();
     return userType;
   }
 
@@ -210,44 +209,81 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [mainColor, secondaryColor],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+      body: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFF0E3460), Color(0xFF08203E)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
+        ),
+        child: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Center(
-                child: Image.asset(
-                  'assets/icons/icon.png',
-                  width: 300,
-                  height: 100,
+              const Spacer(flex: 2),
+              // Logo / icon
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFFFFD700), Color(0xFFED2939)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFFED2939).withOpacity(0.35),
+                      blurRadius: 30,
+                      offset: const Offset(0, 10),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.location_on_rounded,
+                  color: Colors.white,
+                  size: 52,
                 ),
               ),
-              // LinearGradientMask(
-              //   child: Icon(
-              //     Icons.online_prediction,
-              //     size: 175,
-              //     color: Colors.white,
-              //   ),
-              // ),
-              const SizedBox(height: 10),
-              const LinearGradientMask(
-                  child: Text(
-                "Track Me",
+              const SizedBox(height: 28),
+              const Text(
+                'TrackMe',
                 style: TextStyle(
-                  fontFamily: "Poppins",
-                  fontStyle: FontStyle.italic,
+                  fontFamily: 'Poppins',
+                  fontSize: 38,
+                  fontWeight: FontWeight.w800,
                   color: Colors.white,
-                  fontSize: 40,
+                  letterSpacing: 1.5,
                 ),
-              )),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Your safety, always connected',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white.withOpacity(0.6),
+                  letterSpacing: 0.3,
+                ),
+              ),
+              const Spacer(flex: 2),
+              // Loading indicator at bottom
+              SizedBox(
+                width: 40,
+                height: 40,
+                child: CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    const Color(0xFFFFD700).withOpacity(0.8),
+                  ),
+                  strokeWidth: 2.5,
+                ),
+              ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
