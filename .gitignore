@@ -1,0 +1,26 @@
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.cer
+credentials.json
+service-account*.json
+
+# Local build and tool output
+node_modules/
+**/build/
+**/dist/
+coverage/
+.dart_tool/
+.gradle/
+DerivedData/
+
+# IDE and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

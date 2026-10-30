@@ -241,13 +241,14 @@ const String Api_Link = "https://your-backend-domain.com";
     android:value="YOUR_GOOGLE_MAPS_API_KEY"/>
 ```
 
-**iOS** — `ios/Runner/AppDelegate.swift`:
+**iOS** — provide `GOOGLE_MAPS_API_KEY` as an Xcode build setting or environment variable. The value is read from `ios/Runner/Info.plist` at build time:
 
-```swift
-GMSServices.provideAPIKey("YOUR_GOOGLE_MAPS_API_KEY")
+```bash
+export GOOGLE_MAPS_API_KEY="your-restricted-key"
+flutter build ios
 ```
 
-> ⚠️ **Never commit real API keys to version control.** Use environment variables or a secrets manager.
+> ⚠️ **Never commit real API keys to version control.** Restrict Google Maps keys by app identifier/signing certificate, enabled APIs, and quotas. Rotate any key that was previously committed.
 
 ### TLS Certificate Pinning
 
