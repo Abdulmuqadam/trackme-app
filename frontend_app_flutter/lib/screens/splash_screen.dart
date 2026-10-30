@@ -34,14 +34,18 @@ class _SplashScreenState extends State<SplashScreen>
       _connectivityResult = connectivityResult;
     });
     if (_connectivityResult == ConnectivityResult.none) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: CustomSnackBarWidget(errorText: "Check Network Connection"),
-          behavior: SnackBarBehavior.floating,
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
-      );
+      
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: CustomSnackBarWidget(
+              errorText: "Check Network Connection",
+            ),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
+        );
+      
     }
   }
 
@@ -50,17 +54,12 @@ class _SplashScreenState extends State<SplashScreen>
     try {
       final jwtToken = await StorageService.getToken();
       if (jwtToken == null) {
-        Future.delayed(
-          const Duration(seconds: 5),
-          () {
-            if (!mounted) return;
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const LogInScreen(),
-              ),
-            );
-          },
-        );
+        Future.delayed(const Duration(seconds: 5), () {
+          if (!mounted) return;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const LogInScreen()),
+          );
+        });
       } else {
         final response = await http.post(
           Uri.parse(apiUrl),
@@ -74,29 +73,19 @@ class _SplashScreenState extends State<SplashScreen>
           if (userId != null) {
             await StorageService.saveUserId(userId.toString());
           }
-          Future.delayed(
-            const Duration(seconds: 5),
-            () {
-              if (!mounted) return;
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const MainPage(),
-                ),
-              );
-            },
-          );
+          Future.delayed(const Duration(seconds: 5), () {
+            if (!mounted) return;
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const MainPage()),
+            );
+          });
         } else {
-          Future.delayed(
-            const Duration(seconds: 2),
-            () {
-              if (!mounted) return;
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const LogInScreen(),
-                ),
-              );
-            },
-          );
+          Future.delayed(const Duration(seconds: 2), () {
+            if (!mounted) return;
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const LogInScreen()),
+            );
+          });
         }
       }
     } catch (e) {
@@ -113,17 +102,12 @@ class _SplashScreenState extends State<SplashScreen>
     try {
       final jwtToken = await StorageService.getToken();
       if (jwtToken == null) {
-        Future.delayed(
-          const Duration(seconds: 5),
-          () {
-            if (!mounted) return;
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const LogInScreen(),
-              ),
-            );
-          },
-        );
+        Future.delayed(const Duration(seconds: 5), () {
+          if (!mounted) return;
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const LogInScreen()),
+          );
+        });
       } else {
         final response = await http.post(
           Uri.parse(apiUrl),
@@ -137,29 +121,19 @@ class _SplashScreenState extends State<SplashScreen>
           if (userId != null) {
             await StorageService.saveUserId(userId.toString());
           }
-          Future.delayed(
-            const Duration(seconds: 5),
-            () {
-              if (!mounted) return;
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const MainPage(),
-                ),
-              );
-            },
-          );
+          Future.delayed(const Duration(seconds: 5), () {
+            if (!mounted) return;
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const MainPage()),
+            );
+          });
         } else {
-          Future.delayed(
-            const Duration(seconds: 2),
-            () {
-              if (!mounted) return;
-              Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const LogInScreen(),
-                ),
-              );
-            },
-          );
+          Future.delayed(const Duration(seconds: 2), () {
+            if (!mounted) return;
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const LogInScreen()),
+            );
+          });
         }
       }
     } catch (e) {
@@ -201,8 +175,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-        overlays: SystemUiOverlay.values);
+    SystemChrome.setEnabledSystemUIMode(
+      SystemUiMode.manual,
+      overlays: SystemUiOverlay.values,
+    );
     super.dispose();
   }
 
@@ -237,7 +213,7 @@ class _SplashScreenState extends State<SplashScreen>
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: const Color(0xFFED2939).withOpacity(0.35),
+                      color: const Color(0xFFED2939).withValues(alpha: 0.35),
                       blurRadius: 30,
                       offset: const Offset(0, 10),
                     ),
@@ -267,7 +243,7 @@ class _SplashScreenState extends State<SplashScreen>
                   fontFamily: 'Poppins',
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
-                  color: Colors.white.withOpacity(0.6),
+                  color: Colors.white.withValues(alpha: 0.6),
                   letterSpacing: 0.3,
                 ),
               ),
@@ -278,7 +254,7 @@ class _SplashScreenState extends State<SplashScreen>
                 height: 40,
                 child: CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(
-                    const Color(0xFFFFD700).withOpacity(0.8),
+                    const Color(0xFFFFD700).withValues(alpha: 0.8),
                   ),
                   strokeWidth: 2.5,
                 ),

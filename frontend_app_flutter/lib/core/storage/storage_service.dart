@@ -12,9 +12,7 @@ import 'package:frontend_app_flutter/core/constants/app_constants.dart';
 class StorageService {
   StorageService._();
 
-  static const _storage = FlutterSecureStorage(
-    aOptions: AndroidOptions(encryptedSharedPreferences: true),
-  );
+  static const _storage = FlutterSecureStorage(aOptions: AndroidOptions());
 
   // ── Token ─────────────────────────────────────────────────────────────────
 

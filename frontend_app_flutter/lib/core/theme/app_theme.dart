@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:frontend_app_flutter/core/constants/app_constants.dart';
 
 /// Single source of truth for the app's visual theme.
 ///
@@ -27,20 +26,20 @@ class AppTheme {
 
   // ── Shadow ───────────────────────────────────────────────────────────────
   static List<BoxShadow> get cardShadow => [
-        BoxShadow(
-          color: const Color(0xFF000000).withOpacity(0.07),
-          blurRadius: 16,
-          offset: const Offset(0, 4),
-        ),
-      ];
+    BoxShadow(
+      color: const Color(0xFF000000).withOpacity(0.07),
+      blurRadius: 16,
+      offset: const Offset(0, 4),
+    ),
+  ];
 
   static List<BoxShadow> get elevatedShadow => [
-        BoxShadow(
-          color: _primary.withOpacity(0.25),
-          blurRadius: 18,
-          offset: const Offset(0, 6),
-        ),
-      ];
+    BoxShadow(
+      color: _primary.withOpacity(0.25),
+      blurRadius: 18,
+      offset: const Offset(0, 6),
+    ),
+  ];
 
   // ── Gradient helpers ─────────────────────────────────────────────────────
   static const LinearGradient brandGradient = LinearGradient(
@@ -148,8 +147,10 @@ class AppTheme {
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: const Color(0xFFF1F3F6),
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 16,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusXl),
           borderSide: BorderSide.none,
@@ -171,10 +172,7 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        hintStyle: const TextStyle(
-          color: Color(0xFFADB5BD),
-          fontSize: 14,
-        ),
+        hintStyle: const TextStyle(color: Color(0xFFADB5BD), fontSize: 14),
         prefixIconColor: _textSecondary,
         suffixIconColor: _textSecondary,
         floatingLabelStyle: const TextStyle(
@@ -185,7 +183,7 @@ class AppTheme {
       ),
 
       // ── Card ────────────────────────────────────────────────────────────
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: _cardSurface,
         elevation: 0,
         shape: RoundedRectangleBorder(
@@ -207,10 +205,7 @@ class AppTheme {
           fontSize: 11,
           fontWeight: FontWeight.w600,
         ),
-        unselectedLabelStyle: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 11,
-        ),
+        unselectedLabelStyle: TextStyle(fontFamily: 'Poppins', fontSize: 11),
       ),
 
       // ── Chip ────────────────────────────────────────────────────────────
@@ -244,7 +239,7 @@ class AppTheme {
       ),
 
       // ── Dialog ──────────────────────────────────────────────────────────
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: Colors.white,
         elevation: 8,
         shadowColor: const Color(0x20000000),

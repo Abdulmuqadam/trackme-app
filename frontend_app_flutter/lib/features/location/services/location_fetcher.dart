@@ -52,12 +52,9 @@ class LocationFetcher {
 
       _locationSubscription =
           _location.onLocationChanged.listen((LocationData currentLocation) {
-        if (currentLocation.latitude != null &&
-            currentLocation.longitude != null) {
-          _currentPosition =
-              LatLng(currentLocation.latitude!, currentLocation.longitude!);
-          _saveLocationToPreferences(_currentPosition!);
-        }
+        _currentPosition =
+            LatLng(currentLocation.latitude, currentLocation.longitude);
+        _saveLocationToPreferences(_currentPosition!);
       });
 
       // Start sending location to the backend periodically
@@ -74,11 +71,6 @@ class LocationFetcher {
 
   void _startSendingLocation() {
     const duration = Duration(seconds: 15);
-    _locationTimer = Timer.periodic(duration, (_) {
-      if (_currentPosition != null) {
-        _sendLocationToBackend(_currentPosition!);
-      }
-    });
   }
 
   void _saveLocationToPreferences(LatLng position) {

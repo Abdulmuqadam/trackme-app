@@ -155,7 +155,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     children: [
                       Icon(Icons.chat_bubble_outline_rounded,
                           size: 56,
-                          color: AppTheme.textSecondary.withOpacity(0.4)),
+                          color: AppTheme.textSecondary.withValues(alpha: 0.4)),
                       const SizedBox(height: 12),
                       Text(
                         'No messages yet',
@@ -218,7 +218,7 @@ class _ChatBubble extends StatelessWidget {
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: AppTheme.navy.withOpacity(0.1),
+                color: AppTheme.navy.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -283,7 +283,7 @@ class _ChatBubble extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 10,
                       color: isMe
-                          ? Colors.white.withOpacity(0.7)
+                          ? Colors.white.withValues(alpha: 0.7)
                           : AppTheme.textSecondary,
                     ),
                   ),
@@ -311,7 +311,7 @@ class _InputBar extends StatelessWidget {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 10,
             offset: const Offset(0, -3),
           ),

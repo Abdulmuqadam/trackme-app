@@ -407,10 +407,10 @@ class UpdateFacilitatorForm extends StatefulWidget {
   const UpdateFacilitatorForm({super.key});
 
   @override
-  _UpdateFacilitatorFormState createState() => _UpdateFacilitatorFormState();
+  UpdateFacilitatorFormState createState() => UpdateFacilitatorFormState();
 }
 
-class _UpdateFacilitatorFormState extends State<UpdateUserForm> {
+class UpdateFacilitatorFormState extends State<UpdateFacilitatorForm> {
   @override
   Widget build(BuildContext context) {
     return Form(

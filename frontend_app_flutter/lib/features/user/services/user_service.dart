@@ -1,10 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-
+import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/core/storage/storage_service.dart';
 
 class UserService {
+  
   /// Builds common headers including org context when available.
   static Future<Map<String, String>> _buildHeaders() async {
     final headers = <String, String>{'content-type': 'application/json'};
@@ -49,7 +50,7 @@ class UserService {
         if (kDebugMode) {
           print("Data is retrieved successfully");
         }
-        final String username = data["firstname"] + " " + data["lastname"];
+        final String username = '${data["firstname"]} ${data["lastname"]}';
         final String email = data["email"];
 
         // Save username to secure storage

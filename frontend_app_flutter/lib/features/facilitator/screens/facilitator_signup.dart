@@ -229,7 +229,7 @@ class _FacilitatorSignupFormState extends State<FacilitatorSignupForm> {
             const SizedBox(width: 12),
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: selectedGender,
+                initialValue: selectedGender,
                 onChanged: (v) => setState(() => selectedGender = v!),
                 decoration: const InputDecoration(
                   labelText: 'Gender',
@@ -245,7 +245,7 @@ class _FacilitatorSignupFormState extends State<FacilitatorSignupForm> {
         const SizedBox(height: 16),
 
         DropdownButtonFormField<String>(
-          value: selectedRole,
+          initialValue: selectedRole,
           onChanged: (v) => setState(() => selectedRole = v),
           decoration: const InputDecoration(
             labelText: 'Role',

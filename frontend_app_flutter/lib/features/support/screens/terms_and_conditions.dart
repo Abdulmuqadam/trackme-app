@@ -19,40 +19,40 @@ class TermConditionPage extends StatelessWidget {
         ),
         title: const Text('Terms & Conditions'),
       ),
-      body: const _ArticleBody(
+      body: const ArticleBody(
         title: 'Terms & Conditions',
         sections: [
-          _Section(
+          Section(
             heading: '1. Frequently Asked Questions',
             body:
                 'Visit our FAQ section to find answers to common questions about TrackMe. We\'ve compiled a list of frequently asked questions with detailed answers to provide quick solutions.',
           ),
-          _Section(
+          Section(
             heading: '2. User Guide',
             body:
                 'Explore our comprehensive User Guide for step-by-step instructions on using all features of the TrackMe app — from setting up emergency contacts to initiating emergency queries.',
           ),
-          _Section(
+          Section(
             heading: '3. Contact Support',
             body:
                 'If you can\'t find the answers you\'re looking for, reach out to our dedicated support team through the App or via email. We\'re available to assist with any questions or technical issues.',
           ),
-          _Section(
+          Section(
             heading: '4. Feedback and Suggestions',
             body:
                 'We value your feedback and suggestions. If you have ideas for new features or general feedback, please let us know — your input helps us continually enhance the App.',
           ),
-          _Section(
+          Section(
             heading: '5. Privacy and Security',
             body:
                 'At TrackMe, we prioritize your privacy and security. If you have concerns, refer to our Privacy Policy or contact our support team for assistance.',
           ),
-          _Section(
+          Section(
             heading: '6. Stay Updated',
             body:
                 'Stay informed about the latest news and updates by following our social media channels and checking our website. We\'ll keep you posted on new features and important announcements.',
           ),
-          _Section(
+          Section(
             heading: '7. Community Forum',
             body:
                 'Join our community forum to connect with other TrackMe users, share experiences, and exchange tips and advice on using the App effectively.',
@@ -65,16 +65,16 @@ class TermConditionPage extends StatelessWidget {
 
 // ── Shared article layout widgets ─────────────────────────────────────────
 
-class _Section {
-  const _Section({required this.heading, required this.body});
+class Section {
+  const Section({required this.heading, required this.body});
   final String heading;
   final String body;
 }
 
-class _ArticleBody extends StatelessWidget {
-  const _ArticleBody({required this.title, required this.sections});
+class ArticleBody extends StatelessWidget {
+  const ArticleBody({required this.title, required this.sections});
   final String title;
-  final List<_Section> sections;
+  final List<Section> sections;
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +99,7 @@ class _ArticleBody extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.12),
+                    color: Colors.white.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.article_rounded,
@@ -123,16 +123,16 @@ class _ArticleBody extends StatelessWidget {
           const SizedBox(height: 20),
 
           // Sections
-          ...sections.map((s) => _SectionCard(section: s)),
+          ...sections.map((s) => SectionCard(section: s)),
         ],
       ),
     );
   }
 }
 
-class _SectionCard extends StatelessWidget {
-  const _SectionCard({required this.section});
-  final _Section section;
+class SectionCard extends StatelessWidget {
+  const SectionCard({required this.section});
+  final Section section;
 
   @override
   Widget build(BuildContext context) {

@@ -17,10 +17,10 @@ class FacilitatorHomeContent extends StatefulWidget {
   const FacilitatorHomeContent({super.key});
 
   @override
-  _FacilitatorHomeContentState createState() => _FacilitatorHomeContentState();
+  FacilitatorHomeContentState createState() => FacilitatorHomeContentState();
 }
 
-class _FacilitatorHomeContentState extends State<FacilitatorHomeContent> {
+class FacilitatorHomeContentState extends State<FacilitatorHomeContent> {
   final LocationFetcher _locationFetcher = LocationFetcher();
   List<Queries> queryData = [];
   bool isLoading = false;
@@ -43,9 +43,7 @@ class _FacilitatorHomeContentState extends State<FacilitatorHomeContent> {
     if (userId == null) return;
 
     const url = '$Api_Link/api/queries/getQueryByFacilitatorId';
-    final Map<String, dynamic> data = {
-      "facilitatorID": userId,
-    };
+    final Map<String, dynamic> data = {"facilitatorID": userId};
 
     try {
       final response = await http.post(
@@ -67,30 +65,28 @@ class _FacilitatorHomeContentState extends State<FacilitatorHomeContent> {
           final List<dynamic> queryList = responseData['queries'];
           setState(() {
             isLoading = false;
-            queryData = queryList.map((item) {
-              final id = item['id'] ?? 0;
-              final image = item['image'] ?? 'assets/images/help.png';
-              final queryType = item['querytype'] ?? '';
-              final postedBy = item['postedBy'] ?? '';
-              final message = item['text'] ?? '';
-              final location = item['location'] ?? '';
-              final completed = item['completed'] ?? false;
-              final audioData = item['audio'] ?? '';
-              return Queries(
-                id,
-                [
-                  secondaryColor,
-                  mainColor,
-                ],
-                image,
-                queryType,
-                postedBy,
-                message,
-                location,
-                completed,
-                audioData,
-              );
-            }).toList();
+            queryData =
+                queryList.map((item) {
+                  final id = item['id'] ?? 0;
+                  final image = item['image'] ?? 'assets/images/help.png';
+                  final queryType = item['querytype'] ?? '';
+                  final postedBy = item['postedBy'] ?? '';
+                  final message = item['text'] ?? '';
+                  final location = item['location'] ?? '';
+                  final completed = item['completed'] ?? false;
+                  final audioData = item['audio'] ?? '';
+                  return Queries(
+                    id,
+                    [secondaryColor, mainColor],
+                    image,
+                    queryType,
+                    postedBy,
+                    message,
+                    location,
+                    completed,
+                    audioData,
+                  );
+                }).toList();
           });
         } else {
           throw Exception("Unexpected message: ${responseData['message']}");
@@ -138,9 +134,10 @@ class _FacilitatorHomeContentState extends State<FacilitatorHomeContent> {
           const SizedBox(width: 8),
         ],
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : FacilitatorCardView(queryData: queryData),
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : FacilitatorCardView(queryData: queryData),
     );
   }
 }
@@ -156,8 +153,11 @@ class FacilitatorCardView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.inbox_rounded,
-                size: 56, color: AppTheme.textSecondary.withOpacity(0.4)),
+            Icon(
+              Icons.inbox_rounded,
+              size: 56,
+              color: AppTheme.textSecondary.withValues(alpha: 0.4),
+            ),
             const SizedBox(height: 12),
             Text(
               'No operations assigned',
@@ -221,10 +221,10 @@ class FacilitatorCards extends StatefulWidget {
   final VoidCallback onPressed;
 
   @override
-  _FacilitatorCardsState createState() => _FacilitatorCardsState();
+  FacilitatorCardsState createState() => FacilitatorCardsState();
 }
 
-class _FacilitatorCardsState extends State<FacilitatorCards> {
+class FacilitatorCardsState extends State<FacilitatorCards> {
   late bool _isComplete;
   bool isPlaying = false;
   AudioPlayer player = AudioPlayer();
@@ -353,8 +353,11 @@ class _FacilitatorCardsState extends State<FacilitatorCards> {
                         const SizedBox(height: 4),
                         Row(
                           children: [
-                            Icon(Icons.person_outline_rounded,
-                                size: 13, color: AppTheme.textSecondary),
+                            Icon(
+                              Icons.person_outline_rounded,
+                              size: 13,
+                              color: AppTheme.textSecondary,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               widget.postedBy,
@@ -373,7 +376,7 @@ class _FacilitatorCardsState extends State<FacilitatorCards> {
                     children: [
                       Switch(
                         value: _isComplete,
-                        activeColor: const Color(0xFF22C55E),
+                        activeThumbColor: const Color(0xFF22C55E),
                         onChanged: (value) {
                           setState(() {
                             _isComplete = value;
@@ -386,9 +389,10 @@ class _FacilitatorCardsState extends State<FacilitatorCards> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
-                          color: _isComplete
-                              ? const Color(0xFF22C55E)
-                              : AppTheme.primary,
+                          color:
+                              _isComplete
+                                  ? const Color(0xFF22C55E)
+                                  : AppTheme.primary,
                         ),
                       ),
                     ],
@@ -412,35 +416,45 @@ class _FacilitatorCardsState extends State<FacilitatorCards> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _InfoRow(
-                    icon: Icons.message_outlined, label: widget.message),
+                _InfoRow(icon: Icons.message_outlined, label: widget.message),
                 const SizedBox(height: 8),
                 _InfoRow(
-                    icon: Icons.person_outline_rounded,
-                    label: 'By: ${widget.postedBy}'),
+                  icon: Icons.person_outline_rounded,
+                  label: 'By: ${widget.postedBy}',
+                ),
                 const SizedBox(height: 8),
                 _InfoRow(
-                    icon: Icons.location_on_outlined,
-                    label: widget.location),
+                  icon: Icons.location_on_outlined,
+                  label: widget.location,
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Text('Audio: ',
-                        style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textPrimary)),
+                    Text(
+                      'Audio: ',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textPrimary,
+                      ),
+                    ),
                     IconButton(
-                      icon: Icon(Icons.play_circle_fill_rounded,
-                          color: AppTheme.primary, size: 30),
+                      icon: Icon(
+                        Icons.play_circle_fill_rounded,
+                        color: AppTheme.primary,
+                        size: 30,
+                      ),
                       onPressed: () async {
                         await downloadAudio('$Api_Link/${widget.audioData}');
                         await playAudio();
                       },
                     ),
                     IconButton(
-                      icon: Icon(Icons.stop_circle_rounded,
-                          color: AppTheme.textSecondary, size: 30),
+                      icon: Icon(
+                        Icons.stop_circle_rounded,
+                        color: AppTheme.textSecondary,
+                        size: 30,
+                      ),
                       onPressed: stopAudio,
                     ),
                   ],
@@ -475,10 +489,7 @@ class _FacilitatorCardsState extends State<FacilitatorCards> {
   Future<void> updateQueryCompletionStatus(int id, bool completed) async {
     const apiUrl = '$Api_Link/api/queries/updatequerycomplete';
 
-    final Map<String, dynamic> data = {
-      "id": id,
-      "completed": completed,
-    };
+    final Map<String, dynamic> data = {"id": id, "completed": completed};
 
     try {
       final response = await http.post(
@@ -496,7 +507,8 @@ class _FacilitatorCardsState extends State<FacilitatorCards> {
       } else {
         if (kDebugMode) {
           print(
-              "Error in updating query completion status: ${response.statusCode}");
+            "Error in updating query completion status: ${response.statusCode}",
+          );
         }
       }
     } catch (e) {
@@ -518,8 +530,17 @@ class Queries {
   final bool completed;
   final List<Color> colors;
 
-  Queries(this.id, this.colors, this.image, this.name, this.postedBy,
-      this.message, this.location, this.completed, this.audioData);
+  Queries(
+    this.id,
+    this.colors,
+    this.image,
+    this.name,
+    this.postedBy,
+    this.message,
+    this.location,
+    this.completed,
+    this.audioData,
+  );
 }
 
 class _InfoRow extends StatelessWidget {

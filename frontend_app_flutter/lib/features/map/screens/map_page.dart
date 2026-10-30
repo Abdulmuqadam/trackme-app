@@ -250,16 +250,13 @@ class _MapPageState extends State<MapPage> {
     }
     _locationSubscription = _locationController.onLocationChanged
         .listen((LocationData currentLocation) {
-      if (currentLocation.latitude != null &&
-          currentLocation.longitude != null) {
-        setState(() {
-          _currentPosition =
-              LatLng(currentLocation.latitude!, currentLocation.longitude!);
-          _addPolylines(_currentPosition);
-        });
-        _preferences.setString("location",
-            "${currentLocation.latitude},${currentLocation.longitude}");
-      }
+      setState(() {
+        _currentPosition =
+            LatLng(currentLocation.latitude, currentLocation.longitude);
+        _addPolylines(_currentPosition);
+      });
+      _preferences.setString("location",
+          "${currentLocation.latitude},${currentLocation.longitude}");
     });
   }
 

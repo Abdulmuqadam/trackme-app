@@ -420,7 +420,7 @@ class _QueriesCardState extends State<QueriesCard> {
                     IconButton(
                       onPressed: () async {
                         await downloadAudio(
-                            "${Api_Link}/${widget.audioData}");
+                            "$Api_Link/${widget.audioData}");
                         await playAudio();
                       },
                       icon: const Icon(

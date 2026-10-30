@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 import 'package:fluttercontactpicker/fluttercontactpicker.dart';
-import 'package:frontend_app_flutter/core/theme/app_theme.dart';
 import 'package:frontend_app_flutter/misc/const.dart';
 import 'package:frontend_app_flutter/screens/user_home.dart';
 import 'package:path_provider/path_provider.dart';
@@ -539,29 +538,22 @@ class _TextBoxState extends State<TextBox> {
 
       final location = prefs.getString("location");
       String link = "https://www.google.com/maps/place/$location";
-      if (phoneContact != null) {
-        setState(() {
-          _selectedContact = phoneContact.phoneNumber?.number;
-        });
-        if (kDebugMode) {
-          print(_selectedContact);
-        }
-        String message = textController.text;
-        final Uri url = Uri(
-            scheme: "sms",
-            path: _selectedContact,
-            query: 'body=Message: $message.  my location is :$link');
-        if (await canLaunchUrl(url)) {
-          await launchUrl(url);
-        } else {
-          if (kDebugMode) {
-            print("Cannot launch this URL");
-          }
-        }
+      setState(() {
+        _selectedContact = phoneContact.phoneNumber?.number;
+      });
+      if (kDebugMode) {
+        print(_selectedContact);
+      }
+      String message = textController.text;
+      final Uri url = Uri(
+          scheme: "sms",
+          path: _selectedContact,
+          query: 'body=Message: $message.  my location is :$link');
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url);
       } else {
-        // Handle case where user cancels contact picking
         if (kDebugMode) {
-          print('Contact picking cancelled');
+          print("Cannot launch this URL");
         }
       }
     } else {

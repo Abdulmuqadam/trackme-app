@@ -2,8 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend_app_flutter/core/theme/app_theme.dart';
-import 'package:frontend_app_flutter/misc/const.dart';
-import 'package:frontend_app_flutter/features/user/screens/profile_screen.dart';
 import 'package:frontend_app_flutter/screens/queries_list.dart';
 import 'package:frontend_app_flutter/screens/query_send.dart';
 
@@ -61,14 +59,26 @@ class User {
 }
 
 List<User> user = [
-  User([Colors.grey, Colors.blueAccent], 'assets/images/homeinvasion.jpg',
-      'Home Invasion'),
-  User([Colors.blueAccent, Colors.blueAccent], 'assets/images/medicalhelp.jpg',
-      'Medical Help'),
-  User([Colors.redAccent, Colors.blueAccent],
-      'assets/images/fireextinguisher.jpg', 'Fire Extinguisher'),
-  User([Colors.greenAccent, Colors.blueAccent],
-      'assets/images/travelemergency.png', 'Travel Emergency'),
+  User(
+    [Colors.grey, Colors.blueAccent],
+    'assets/images/homeinvasion.jpg',
+    'Home Invasion',
+  ),
+  User(
+    [Colors.blueAccent, Colors.blueAccent],
+    'assets/images/medicalhelp.jpg',
+    'Medical Help',
+  ),
+  User(
+    [Colors.redAccent, Colors.blueAccent],
+    'assets/images/fireextinguisher.jpg',
+    'Fire Extinguisher',
+  ),
+  User(
+    [Colors.greenAccent, Colors.blueAccent],
+    'assets/images/travelemergency.png',
+    'Travel Emergency',
+  ),
 ];
 
 // Per-card gradient pairs
@@ -104,7 +114,8 @@ class UserHomeContent extends StatelessWidget {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => const QueriesListPage()),
+                  builder: (context) => const QueriesListPage(),
+                ),
               );
             },
             icon: const Icon(CupertinoIcons.square_favorites_fill, size: 22),
@@ -145,7 +156,7 @@ class UserHomeContent extends StatelessWidget {
                         'Select your emergency type below',
                         style: TextStyle(
                           fontSize: 13,
-                          color: Colors.white.withOpacity(0.65),
+                          color: Colors.white.withValues(alpha: 0.65),
                         ),
                       ),
                     ],
@@ -155,7 +166,7 @@ class UserHomeContent extends StatelessWidget {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.12),
+                    color: Colors.white.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: const Icon(
@@ -183,17 +194,22 @@ class UserHomeContent extends StatelessWidget {
               physics: const BouncingScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
               itemCount: user.length,
-              itemBuilder: (context, index) => _EmergencyCard(
-                user: user[index],
-                gradient: _cardGradients[index],
-                icon: _cardIcons[index],
-                onTap: () {
-                  if (kDebugMode) print('Card pressed: ${user[index].name}');
-                  Navigator.of(context).pushReplacement(MaterialPageRoute(
-                      builder: (context) =>
-                          QuerySendPage(user: user[index])));
-                },
-              ),
+              itemBuilder:
+                  (context, index) => _EmergencyCard(
+                    user: user[index],
+                    gradient: _cardGradients[index],
+                    icon: _cardIcons[index],
+                    onTap: () {
+                      if (kDebugMode)
+                        print('Card pressed: ${user[index].name}');
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder:
+                              (context) => QuerySendPage(user: user[index]),
+                        ),
+                      );
+                    },
+                  ),
             ),
           ),
         ],
@@ -233,7 +249,7 @@ class _EmergencyCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppTheme.radiusLg),
           boxShadow: [
             BoxShadow(
-              color: gradient.first.withOpacity(0.35),
+              color: gradient.first.withValues(alpha: 0.35),
               blurRadius: 14,
               offset: const Offset(0, 5),
             ),
@@ -270,7 +286,7 @@ class _EmergencyCard extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.18),
+                color: Colors.white.withValues(alpha: 0.18),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
@@ -357,15 +373,19 @@ class UserCardView extends StatelessWidget {
         child: ListView.builder(
           padding: const EdgeInsets.all(16),
           itemCount: user.length,
-          itemBuilder: (context, index) => _EmergencyCard(
-            user: user[index],
-            gradient: _cardGradients[index],
-            icon: _cardIcons[index],
-            onTap: () {
-              Navigator.of(context).pushReplacement(MaterialPageRoute(
-                  builder: (context) => QuerySendPage(user: user[index])));
-            },
-          ),
+          itemBuilder:
+              (context, index) => _EmergencyCard(
+                user: user[index],
+                gradient: _cardGradients[index],
+                icon: _cardIcons[index],
+                onTap: () {
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (context) => QuerySendPage(user: user[index]),
+                    ),
+                  );
+                },
+              ),
         ),
       ),
     );

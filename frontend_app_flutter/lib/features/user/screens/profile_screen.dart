@@ -183,7 +183,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           email.isEmpty ? 'your@email.com' : email,
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.white.withOpacity(0.65),
+                            color: Colors.white.withValues(alpha: 0.65),
                           ),
                         ),
                         const SizedBox(height: 16),
@@ -197,11 +197,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 24, vertical: 10),
                             decoration: BoxDecoration(
-                              color: Colors.white.withOpacity(0.15),
+                              color: Colors.white.withValues(alpha: 0.15),
                               borderRadius:
                                   BorderRadius.circular(AppTheme.radiusXl),
                               border: Border.all(
-                                  color: Colors.white.withOpacity(0.3)),
+                                  color: Colors.white.withValues(alpha: 0.3)),
                             ),
                             child: const Text(
                               'Edit Profile',
@@ -322,7 +322,7 @@ class _MenuTile extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: iColor.withOpacity(0.1),
+                    color: iColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Icon(icon, color: iColor, size: 20),
