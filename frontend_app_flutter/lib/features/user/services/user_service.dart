@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:frontend_app_flutter/core/storage/storage_service.dart';
-import 'const.dart';
 
 class UserService {
   /// Builds common headers including org context when available.
