@@ -58,3 +58,5 @@ temp/
 
 # Uploads directory (if contains user uploads)
 uploads/
+
+data/
